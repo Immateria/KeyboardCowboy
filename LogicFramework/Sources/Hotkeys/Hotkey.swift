@@ -6,7 +6,7 @@ public class Hotkey: Hashable {
   var identifier: EventHotKeyID?
   var reference: EventHotKeyRef?
   var modifiers: Int {
-    var carbonFlags: Int = 0
+    var carbonFlags: Int = Int(CGEventFlags.maskNonCoalesced.rawValue)
     guard let modifiers = keyboardShortcut.modifiers else { return carbonFlags }
 
     if modifiers.contains(.command) == true {
