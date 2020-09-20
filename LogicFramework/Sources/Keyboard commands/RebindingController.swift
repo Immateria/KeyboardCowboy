@@ -63,11 +63,39 @@ final class RebindingController: RebindingControlling {
     for workflow in workflows {
       guard let keyboardShortcut = workflow.keyboardShortcuts.last,
             let shortcutKeyCode = Self.cache[keyboardShortcut.key.uppercased()] else { continue }
-      let hotkey = Hotkey(keyboardShortcut: keyboardShortcut, keyCode: shortcutKeyCode)
-      let modifiers: CGEventFlags = CGEventFlags(rawValue: CGEventFlags.RawValue(hotkey.modifiers))
+      var modifiersMatch: Bool = true
+
+      if let modifiers = keyboardShortcut.modifiers {
+        if modifiersMatch,
+           modifiers.contains(.control),
+           !cgEvent.flags.contains(.maskControl) {
+          modifiersMatch = false
+        }
+
+        if modifiers.contains(.command),
+           !cgEvent.flags.contains(.maskCommand) {
+          modifiersMatch = false
+        }
+
+        if modifiersMatch,
+           modifiers.contains(.option),
+           !cgEvent.flags.contains(.maskAlternate) {
+          modifiersMatch = false
+        }
+
+        if modifiersMatch,
+           modifiers.contains(.shift),
+           !cgEvent.flags.contains(.maskShift) {
+          modifiersMatch = false
+        }
+      } else {
+        modifiersMatch = cgEvent.flags.isDisjoint(with: [
+          .maskControl, .maskCommand, .maskAlternate, .maskShift
+        ])
+      }
 
       guard keyCode == shortcutKeyCode,
-            cgEvent.flags == modifiers else {
+            modifiersMatch else {
         continue
       }
 
