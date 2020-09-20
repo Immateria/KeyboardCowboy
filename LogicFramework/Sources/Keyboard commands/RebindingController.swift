@@ -4,7 +4,7 @@ import Cocoa
 public protocol RebindingControlling {
   init() throws
   func monitor(_ workflows: [Workflow])
-  func callback(_ type: CGEventType, _ cgEvent: CGEvent) -> Unmanaged<CGEvent>?
+  func callback(_ proxy: CGEventTapProxy, _ type: CGEventType, _ cgEvent: CGEvent) -> Unmanaged<CGEvent>?
 }
 
 enum RebindingControllingError: Error {
@@ -35,20 +35,19 @@ final class RebindingController: RebindingControlling {
     let options: CGEventTapOptions = .defaultTap
     let mask: CGEventMask = 1 << CGEventType.keyDown.rawValue
       | 1 << CGEventType.keyUp.rawValue
-    let userInfo: UnsafeMutableRawPointer = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
     guard let machPort = CGEvent.tapCreate(
             tap: tap,
             place: place,
             options: options,
             eventsOfInterest: mask,
-            callback: { _, type, event, userInfo -> Unmanaged<CGEvent>? in
-              if let userInfo = userInfo {
-                let controller = Unmanaged<RebindingController>.fromOpaque(userInfo).takeUnretainedValue()
-                return controller.callback(type, event)
+            callback: { proxy, type, event, userInfo -> Unmanaged<CGEvent>? in
+              if let pointer = userInfo {
+                let controller = Unmanaged<RebindingController>.fromOpaque(pointer).takeUnretainedValue()
+                return controller.callback(proxy, type, event)
               }
               return Unmanaged.passUnretained(event)
             },
-            userInfo: userInfo) else {
+            userInfo: UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())) else {
       throw RebindingControllingError.unableToCreateMachPort
     }
     return machPort
@@ -61,7 +60,7 @@ final class RebindingController: RebindingControlling {
     return runLoopSource
   }
 
-  func callback(_ type: CGEventType, _ event: CGEvent) -> Unmanaged<CGEvent>? {
+  func callback(_ proxy: CGEventTapProxy, _ type: CGEventType, _ event: CGEvent) -> Unmanaged<CGEvent>? {
     let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
     let workflows = Self.workflows
     var result: Unmanaged<CGEvent>? = Unmanaged.passRetained(event)
@@ -89,11 +88,10 @@ final class RebindingController: RebindingControlling {
           continue
         }
         if let cgKeyCode = CGKeyCode(exactly: shortcutKeyCode),
-           let source = CGEventSource(stateID: .privateState),
-           let newEvent = CGEvent(keyboardEventSource: source,
+           let newEvent = CGEvent(keyboardEventSource: nil,
                                   virtualKey: cgKeyCode,
                                   keyDown: type == .keyDown) {
-          newEvent.post(tap: .cghidEventTap)
+          newEvent.tapPostEvent(proxy)
           result = nil
         }
       }
