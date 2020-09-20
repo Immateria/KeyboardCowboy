@@ -2,12 +2,12 @@ import Foundation
 
 public protocol CoreControlling {
   func reload()
-  func activate(_ keyboardShortcuts: Set<KeyboardShortcut>, for worksflows: [Workflow])
+  func activate(_ keyboardShortcuts: Set<KeyboardShortcut>, rebindingWorkflows workflows: [Workflow])
   @discardableResult
   func respond(to keyboardShortcut: KeyboardShortcut) -> [Workflow]
 }
 
-public class CoreController: CoreControlling, HotkeyControllingDelegate {
+public class CoreController: CoreControlling, CommandControllingDelegate, HotkeyControllingDelegate {
   let commandController: CommandControlling
   let groupsController: GroupsControlling
   let hotkeyController: HotkeyControlling
@@ -34,6 +34,7 @@ public class CoreController: CoreControlling, HotkeyControllingDelegate {
     self.rebindingController = try? RebindingController()
     self.workspace = workspace
     self.workflowController = workflowController
+    self.commandController.delegate = self
     self.hotkeyController.delegate = self
     self.reload()
   }
@@ -56,18 +57,22 @@ public class CoreController: CoreControlling, HotkeyControllingDelegate {
     currentGroups = groupsController.filterGroups(using: contextRule)
     currentKeyboardShortcuts = []
 
-    var activeWorkflows = [Workflow]()
+    var rebindingWorkflows = [Workflow]()
     let topLevelKeyboardShortcuts = Set<KeyboardShortcut>(currentGroups.flatMap { group in
       group.workflows.compactMap { workflow in
-        activeWorkflows.append(workflow)
+        if workflow.isRebinding {
+          rebindingWorkflows.append(workflow)
+          return nil
+        }
+
         return workflow.keyboardShortcuts.first
       }
     })
 
-    activate(topLevelKeyboardShortcuts, for: activeWorkflows)
+    activate(topLevelKeyboardShortcuts, rebindingWorkflows: rebindingWorkflows)
   }
 
-  public func activate(_ keyboardShortcuts: Set<KeyboardShortcut>, for worksflows: [Workflow]) {
+  public func activate(_ keyboardShortcuts: Set<KeyboardShortcut>, rebindingWorkflows workflows: [Workflow]) {
     let old: [Hotkey] = Array(hotkeyController.hotkeys)
     var new = [Hotkey]()
     for keyboardShortcut in keyboardShortcuts {
@@ -85,7 +90,7 @@ public class CoreController: CoreControlling, HotkeyControllingDelegate {
       }
     }
 
-    rebindingController?.monitor(worksflows)
+    rebindingController?.monitor(workflows)
   }
 
   public func respond(to keyboardShortcut: KeyboardShortcut) -> [Workflow] {
@@ -102,15 +107,23 @@ public class CoreController: CoreControlling, HotkeyControllingDelegate {
     }
 
     if workflows.count == 1 && shortcutsToActivate.isEmpty {
-      reload()
       for workflow in workflows {
         commandController.run(workflow.commands)
       }
     } else {
-      activate(shortcutsToActivate, for: workflows)
+      activate(shortcutsToActivate, rebindingWorkflows: workflows.filter { $0.isRebinding })
     }
-
     return workflows
+  }
+
+  // MARK: CommandControllingDelegate
+
+  public func commandController(_ controller: CommandController, failedRunning command: Command, commands: [Command]) {}
+
+  public func commandController(_ controller: CommandController, runningCommand command: Command) {}
+
+  public func commandController(_ controller: CommandController, didFinishRunning commands: [Command]) {
+    reload()
   }
 
   // MARK: HotkeyControllingDelegate
