@@ -1,4 +1,5 @@
 import Combine
+import Cocoa
 import Foundation
 
 public protocol KeyboardCommandControlling {
@@ -8,11 +9,33 @@ public protocol KeyboardCommandControlling {
 }
 
 public enum KeyboardCommandControllingError: Error {
-  case failedToRunCommand(Error)
+  case failedToRunCommand(KeyboardCommand)
+  case failedToCreateEventHandler
 }
 
 class KeyboardCommandController: KeyboardCommandControlling {
+
+  let keyMapper: KeyCodeMapper
+  var cache = [String: Int]()
+
+  init() {
+    self.keyMapper = KeyCodeMapper()
+    cache = keyMapper.hashTable()
+  }
+
   func run(_ command: KeyboardCommand) -> CommandPublisher {
-    Result.success(()).publisher.eraseToAnyPublisher()
+    return Future { [weak self] promise in
+      if let key = self?.cache[command.keyboardShortcut.key],
+         let cgKeyCode = CGKeyCode(exactly: key),
+         let source = CGEventSource(stateID: .privateState),
+         let newEvent = CGEvent(keyboardEventSource: source,
+                                virtualKey: cgKeyCode,
+                                keyDown: true) {
+        newEvent.post(tap: .cghidEventTap)
+        promise(.success(()))
+      } else {
+        promise(.failure(KeyboardCommandControllingError.failedToRunCommand(command)))
+      }
+    }.eraseToAnyPublisher()
   }
 }
