@@ -35,13 +35,19 @@ final class RebindingController: RebindingControlling {
     let options: CGEventTapOptions = .defaultTap
     let mask: CGEventMask = 1 << CGEventType.keyDown.rawValue
       | 1 << CGEventType.keyUp.rawValue
-    let userInfo: UnsafeMutableRawPointer = Unmanaged.passUnretained(self).toOpaque()
+    let userInfo: UnsafeMutableRawPointer = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
     guard let machPort = CGEvent.tapCreate(
             tap: tap,
             place: place,
             options: options,
             eventsOfInterest: mask,
-            callback: eventTapCallback,
+            callback: { _, type, event, userInfo -> Unmanaged<CGEvent>? in
+              if let userInfo = userInfo {
+                let controller = Unmanaged<RebindingController>.fromOpaque(userInfo).takeUnretainedValue()
+                return controller.callback(type, event)
+              }
+              return Unmanaged.passUnretained(event)
+            },
             userInfo: userInfo) else {
       throw RebindingControllingError.unableToCreateMachPort
     }
@@ -88,8 +94,8 @@ final class RebindingController: RebindingControlling {
                                   virtualKey: cgKeyCode,
                                   keyDown: type == .keyDown) {
           newEvent.post(tap: .cghidEventTap)
+          result = nil
         }
-        result = nil
       }
     }
 
@@ -112,12 +118,4 @@ final class RebindingController: RebindingControlling {
     let modifierSet = Set<ModifierKey>(modifiers)
     return collectedModifiers == modifierSet
   }
-}
-
-private func eventTapCallback(_ proxy: CGEventTapProxy, _ type: CGEventType, _ event: CGEvent,
-                              _ userInfo: UnsafeMutableRawPointer?) -> Unmanaged<CGEvent>? {
-  guard let handler = userInfo?.assumingMemoryBound(to: RebindingController.self) else {
-    return Unmanaged.passUnretained(event)
-  }
-  return handler.pointee.callback(type, event)
 }
