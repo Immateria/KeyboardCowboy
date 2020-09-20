@@ -55,10 +55,10 @@ final class RebindingController: RebindingControlling {
     return runLoopSource
   }
 
-  func callback(_ type: CGEventType, _ cgEvent: CGEvent) -> Unmanaged<CGEvent>? {
-    let keyCode = cgEvent.getIntegerValueField(.keyboardEventKeycode)
+  func callback(_ type: CGEventType, _ event: CGEvent) -> Unmanaged<CGEvent>? {
+    let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
     let workflows = Self.workflows
-    var result: Unmanaged<CGEvent>? = Unmanaged.passUnretained(cgEvent)
+    var result: Unmanaged<CGEvent>? = Unmanaged.passRetained(event)
 
     for workflow in workflows {
       guard let keyboardShortcut = workflow.keyboardShortcuts.last,
@@ -69,32 +69,9 @@ final class RebindingController: RebindingControlling {
       var modifiersMatch: Bool = true
 
       if let modifiers = keyboardShortcut.modifiers {
-        var collectedModifiers = Set<ModifierKey>()
-
-        if cgEvent.flags.contains(.maskShift), modifiers.contains(.shift) {
-          collectedModifiers.insert(.shift)
-        }
-
-        if cgEvent.flags.contains(.maskControl), modifiers.contains(.control) {
-          collectedModifiers.insert(.control)
-        }
-
-        if cgEvent.flags.contains(.maskAlternate), modifiers.contains(.option) {
-          collectedModifiers.insert(.option)
-        }
-
-        if cgEvent.flags.contains(.maskCommand), modifiers.contains(.command) {
-          collectedModifiers.insert(.command)
-        }
-
-        if cgEvent.flags.contains(.maskSecondaryFn), modifiers.contains(.function) {
-          collectedModifiers.insert(.function)
-        }
-
-        let modifierSet = Set<ModifierKey>(modifiers)
-        modifiersMatch = collectedModifiers == modifierSet
+        modifiersMatch = eventFlagsMatchModifiers(event.flags, modifiers: modifiers)
       } else {
-        modifiersMatch = cgEvent.flags.isDisjoint(with: [
+        modifiersMatch = event.flags.isDisjoint(with: [
           .maskControl, .maskCommand, .maskAlternate, .maskShift
         ])
       }
@@ -117,6 +94,23 @@ final class RebindingController: RebindingControlling {
     }
 
     return result
+  }
+
+  private func eventFlagsMatchModifiers(_ flags: CGEventFlags, modifiers: [ModifierKey]) -> Bool {
+    var collectedModifiers = Set<ModifierKey>()
+
+    if flags.contains(.maskShift) { collectedModifiers.insert(.shift) }
+
+    if flags.contains(.maskControl) { collectedModifiers.insert(.control) }
+
+    if flags.contains(.maskAlternate) { collectedModifiers.insert(.option) }
+
+    if flags.contains(.maskCommand) { collectedModifiers.insert(.command) }
+
+    if flags.contains(.maskSecondaryFn) { collectedModifiers.insert(.function) }
+
+    let modifierSet = Set<ModifierKey>(modifiers)
+    return collectedModifiers == modifierSet
   }
 }
 
