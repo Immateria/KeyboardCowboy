@@ -63,41 +63,43 @@ final class RebindingController: RebindingControlling {
     for workflow in workflows {
       guard let keyboardShortcut = workflow.keyboardShortcuts.last,
             let shortcutKeyCode = Self.cache[keyboardShortcut.key.uppercased()] else { continue }
+
+      guard keyCode == shortcutKeyCode else { continue }
+
       var modifiersMatch: Bool = true
 
       if let modifiers = keyboardShortcut.modifiers {
-        if modifiersMatch,
-           modifiers.contains(.control),
-           !cgEvent.flags.contains(.maskControl) {
-          modifiersMatch = false
+        var collectedModifiers = Set<ModifierKey>()
+
+        if cgEvent.flags.contains(.maskShift), modifiers.contains(.shift) {
+          collectedModifiers.insert(.shift)
         }
 
-        if modifiers.contains(.command),
-           !cgEvent.flags.contains(.maskCommand) {
-          modifiersMatch = false
+        if cgEvent.flags.contains(.maskControl), modifiers.contains(.control) {
+          collectedModifiers.insert(.control)
         }
 
-        if modifiersMatch,
-           modifiers.contains(.option),
-           !cgEvent.flags.contains(.maskAlternate) {
-          modifiersMatch = false
+        if cgEvent.flags.contains(.maskAlternate), modifiers.contains(.option) {
+          collectedModifiers.insert(.option)
         }
 
-        if modifiersMatch,
-           modifiers.contains(.shift),
-           !cgEvent.flags.contains(.maskShift) {
-          modifiersMatch = false
+        if cgEvent.flags.contains(.maskCommand), modifiers.contains(.command) {
+          collectedModifiers.insert(.command)
         }
+
+        if cgEvent.flags.contains(.maskSecondaryFn), modifiers.contains(.function) {
+          collectedModifiers.insert(.function)
+        }
+
+        let modifierSet = Set<ModifierKey>(modifiers)
+        modifiersMatch = collectedModifiers == modifierSet
       } else {
         modifiersMatch = cgEvent.flags.isDisjoint(with: [
           .maskControl, .maskCommand, .maskAlternate, .maskShift
         ])
       }
 
-      guard keyCode == shortcutKeyCode,
-            modifiersMatch else {
-        continue
-      }
+      guard modifiersMatch else { continue }
 
       for case .keyboard(let shortcut) in workflow.commands {
         guard let shortcutKeyCode = Self.cache[shortcut.keyboardShortcut.key.uppercased()] else {
