@@ -2,7 +2,7 @@ import Foundation
 
 public protocol CoreControlling {
   func reload()
-  func activate(_ keyboardShortcuts: Set<KeyboardShortcut>)
+  func activate(_ keyboardShortcuts: Set<KeyboardShortcut>, for worksflows: [Workflow])
   @discardableResult
   func respond(to keyboardShortcut: KeyboardShortcut) -> [Workflow]
 }
@@ -54,19 +54,33 @@ public class CoreController: CoreControlling, HotkeyControllingDelegate {
     currentGroups = groupsController.filterGroups(using: contextRule)
     currentKeyboardShortcuts = []
 
+    var activeWorkflows = [Workflow]()
     let topLevelKeyboardShortcuts = Set<KeyboardShortcut>(currentGroups.flatMap { group in
-      group.workflows.compactMap { workflow in workflow.keyboardShortcuts.first }
+      group.workflows.compactMap { workflow in
+        activeWorkflows.append(workflow)
+        return workflow.keyboardShortcuts.first
+      }
     })
 
-    activate(topLevelKeyboardShortcuts)
+    activate(topLevelKeyboardShortcuts, for: activeWorkflows)
   }
 
-  public func activate(_ keyboardShortcuts: Set<KeyboardShortcut>) {
-    hotkeyController.unregisterAll()
+  public func activate(_ keyboardShortcuts: Set<KeyboardShortcut>, for worksflows: [Workflow]) {
+    let old: [Hotkey] = Array(hotkeyController.hotkeys)
+    var new = [Hotkey]()
     for keyboardShortcut in keyboardShortcuts {
-      guard let keyCode = cache[keyboardShortcut.key] else { continue }
+      guard let keyCode = cache[keyboardShortcut.key.uppercased()] else { continue }
       let hotkey = Hotkey(keyboardShortcut: keyboardShortcut, keyCode: keyCode)
-      hotkeyController.register(hotkey)
+      new.append(hotkey)
+    }
+    let difference = new.difference(from: old)
+    for diff in difference {
+      switch diff {
+      case .insert(_, let element, _):
+        hotkeyController.register(element)
+      case .remove(_, let element, _):
+        hotkeyController.unregister(element)
+      }
     }
   }
 
@@ -89,7 +103,7 @@ public class CoreController: CoreControlling, HotkeyControllingDelegate {
         commandController.run(workflow.commands)
       }
     } else {
-      activate(shortcutsToActivate)
+      activate(shortcutsToActivate, for: workflows)
     }
 
     return workflows
