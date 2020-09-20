@@ -12,6 +12,7 @@ public class CoreController: CoreControlling, HotkeyControllingDelegate {
   let groupsController: GroupsControlling
   let hotkeyController: HotkeyControlling
   let keycodeMapper: KeyCodeMapping
+  let rebindingController: RebindingControlling?
   let workflowController: WorkflowControlling
   let workspace: WorkspaceProviding
   var cache = [String: Int]()
@@ -30,6 +31,7 @@ public class CoreController: CoreControlling, HotkeyControllingDelegate {
     self.groupsController = groupsController
     self.hotkeyController = hotkeyController
     self.keycodeMapper = keycodeMapper
+    self.rebindingController = try? RebindingController()
     self.workspace = workspace
     self.workflowController = workflowController
     self.hotkeyController.delegate = self
@@ -82,6 +84,8 @@ public class CoreController: CoreControlling, HotkeyControllingDelegate {
         hotkeyController.unregister(element)
       }
     }
+
+    rebindingController?.monitor(worksflows)
   }
 
   public func respond(to keyboardShortcut: KeyboardShortcut) -> [Workflow] {
