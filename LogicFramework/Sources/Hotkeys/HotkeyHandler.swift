@@ -65,13 +65,11 @@ class HotkeyHandler: HotkeyHandling {
     let identifier = EventHotKeyID(signature: signature, id: counter)
     let options: OptionBits = 0
     let keyCode: UInt32 = UInt32(hotkey.keyCode)
-    let modifiers: UInt32 = UInt32(hotkey.modifiers)
     let targetReference: EventTargetRef = GetEventDispatcherTarget()
     var reference: EventHotKeyRef?
-    let error = RegisterEventHotKey(keyCode, modifiers,
+    let error = RegisterEventHotKey(keyCode, keyCode,
                                     identifier, targetReference,
                                     options, &reference)
-
     guard error == noErr else {
       return false
     }
