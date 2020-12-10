@@ -4,7 +4,7 @@ import ModelKit
 struct WorkflowListCell: View {
   let workflow: Workflow
   @State var isHovering: Bool = false
-  @EnvironmentObject var userSelection: UserSelection
+  @State var selected: Bool
 
   var body: some View {
     VStack(alignment: .center, spacing: 0) {
@@ -19,7 +19,7 @@ struct WorkflowListCell: View {
         Spacer()
         icon
       }.padding(.leading, 10)
-      Divider().opacity( userSelection.workflow == workflow ? 0 : 0.33)
+      Divider().opacity(selected ? 0 : 0.33)
     }
   }
 }
@@ -93,7 +93,7 @@ struct WorkflowListCell_Previews: PreviewProvider, TestPreviewProvider {
     ForEach(ModelFactory().commands()) { command in
       WorkflowListCell(workflow: ModelFactory().workflowCell(
         [command], name: command.name
-      )).environmentObject(UserSelection())
+      ), selected: false)
     }
   }
 }

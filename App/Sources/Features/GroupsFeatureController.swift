@@ -3,6 +3,7 @@ import Foundation
 import LogicFramework
 import ViewKit
 import ModelKit
+import SwiftUI
 
 final class GroupsFeatureController: ViewController,
                                      WorkflowFeatureControllerDelegate {
@@ -10,17 +11,11 @@ final class GroupsFeatureController: ViewController,
   var state = [ModelKit.Group]()
   var applications = [Application]()
   let groupsController: GroupsControlling
-  let userSelection: UserSelection
 
-  init(groupsController: GroupsControlling, applications: [Application],
-       userSelection: UserSelection) {
-    userSelection.group = groupsController.groups.first
-    userSelection.workflow = groupsController.groups.first?.workflows.first
-
+  init(groupsController: GroupsControlling, applications: [Application]) {
     self.applications = applications
     self.groupsController = groupsController
     self.state = groupsController.groups
-    self.userSelection = userSelection
   }
 
   // MARK: ViewController
@@ -48,7 +43,7 @@ final class GroupsFeatureController: ViewController,
     groupsController.reloadGroups(groups)
     subject.send(groups)
     self.state = groups
-    handler?(self.userSelection)
+//    handler?(self.userSelection)
   }
 
   private func newGroup() {

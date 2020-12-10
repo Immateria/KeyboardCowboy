@@ -64,11 +64,9 @@ public struct KeyboardShortcutList: View {
           .padding(.horizontal)
           .background(Color(.windowBackgroundColor))
           .shadow(color: Color(.shadowColor).opacity(0.15), radius: 3, x: 0, y: 1)
-          .animation(.none)
         })
       }
     }
-    .animation(.linear)
   }
 }
 

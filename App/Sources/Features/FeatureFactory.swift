@@ -2,13 +2,39 @@ import Foundation
 import LogicFramework
 import ModelKit
 import ViewKit
+import SwiftUI
+
+class FeatureContext {
+  let applicationProvider: ApplicationsProvider
+  let commandFeature: CommandsFeatureController
+  let factory: ViewFactory
+  let groupsFeature: GroupsFeatureController
+  let keyboardFeature: KeyboardShortcutsFeatureController
+  let searchFeature: SearchFeatureController
+  let workflowFeature: WorkflowFeatureController
+
+  init(applicationProvider: ApplicationsProvider,
+       commandFeature: CommandsFeatureController,
+       factory: ViewFactory,
+       groupsFeature: GroupsFeatureController,
+       keyboardFeature: KeyboardShortcutsFeatureController,
+       searchFeature: SearchFeatureController,
+       workflowFeature: WorkflowFeatureController) {
+    self.applicationProvider = applicationProvider
+    self.commandFeature = commandFeature
+    self.factory = factory
+    self.groupsFeature = groupsFeature
+    self.keyboardFeature = keyboardFeature
+    self.searchFeature = searchFeature
+    self.workflowFeature = workflowFeature
+  }
+}
 
 final class FeatureFactory {
   private let coreController: CoreControlling
   private var groupsController: GroupsControlling {
     coreController.groupsController
   }
-  private var groups: [Group] { coreController.groups }
   private var installedApplications: [Application] {
     coreController.installedApplications
   }
@@ -21,19 +47,12 @@ final class FeatureFactory {
     MenubarController()
   }
 
-  // swiftlint:disable large_tuple
-  func applicationStack(userSelection: UserSelection) -> (applicationProvider: ApplicationsProvider,
-                                                          commandFeature: CommandsFeatureController,
-                                                          factory: ViewFactory,
-                                                          groupsFeature: GroupsFeatureController,
-                                                          keyboardFeature: KeyboardShortcutsFeatureController,
-                                                          searchFeature: SearchFeatureController,
-                                                          workflowFeature: WorkflowFeatureController) {
+  func featureContext(groupStore: GroupStore, workflowStore: WorkflowStore) -> FeatureContext {
     let applicationProvider = ApplicationsProvider(applications: coreController.installedApplications)
     let commandsController = commandsFeature(commandController: coreController.commandController)
-    let groupFeatureController = groupFeature(userSelection: userSelection)
+    let groupFeatureController = groupFeature(groupStore: groupStore, workflowStore: workflowStore)
     let keyboardController = keyboardShortcutFeature()
-    let searchController = searchFeature(userSelection: userSelection)
+    let searchController = searchFeature()
     let workflowController = workflowFeature()
 
     workflowController.delegate = groupFeatureController
@@ -46,10 +65,11 @@ final class FeatureFactory {
                                  keyboardShortcutController: keyboardController.erase(),
                                  openPanelController: OpenPanelViewController().erase(),
                                  searchController: searchController.erase(),
-                                 userSelection: userSelection,
-                                 workflowController: workflowController.erase())
+                                 workflowController: workflowController.erase(),
+                                 groupStore: groupStore,
+                                 workflowStore: workflowStore)
 
-    return (applicationProvider: applicationProvider,
+    return FeatureContext(applicationProvider: applicationProvider,
             commandFeature: commandsController,
             factory: factory,
             groupsFeature: groupFeatureController,
@@ -58,11 +78,10 @@ final class FeatureFactory {
             workflowFeature: workflowController)
   }
 
-  func groupFeature(userSelection: UserSelection) -> GroupsFeatureController {
+  func groupFeature(groupStore: GroupStore, workflowStore: WorkflowStore) -> GroupsFeatureController {
     GroupsFeatureController(
       groupsController: groupsController,
-      applications: installedApplications,
-      userSelection: userSelection
+      applications: installedApplications
     )
   }
 
@@ -86,13 +105,12 @@ final class FeatureFactory {
       installedApplications: installedApplications)
   }
 
-  func searchFeature(userSelection: UserSelection) -> SearchFeatureController {
+  func searchFeature() -> SearchFeatureController {
     let root = SearchRootController(groupsController: groupsController,
                                     groupSearch: SearchGroupsController())
     let feature = SearchFeatureController(searchController: root,
                                           groupController: groupsController,
-                                          query: .constant(""),
-                                          userSelection: userSelection)
+                                          query: .constant(""))
     return feature
   }
 }

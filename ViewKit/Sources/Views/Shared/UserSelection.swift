@@ -1,15 +1,15 @@
 import SwiftUI
 import ModelKit
 
-public class UserSelection: ObservableObject {
-  @Published public var group: ModelKit.Group?
-  @Published public var workflow: Workflow?
-  @Published public var hasPrivileges: Bool
+public class UserSelection {
+  @Published public var group: ModelKit.Group? {
+    didSet { print("didSet.group") }
+  }
+  @Published public var workflow: Workflow? {
+    didSet { print("didSet.workflow") }
+  }
 
-  public init(group: ModelKit.Group? = nil, workflow: ModelKit.Workflow? = nil,
-              hasPrivileges: Bool = false) {
-    self.group = group
+  public init(group: ModelKit.Group? = nil, workflow: ModelKit.Workflow? = nil) {
     self.workflow = workflow
-    self.hasPrivileges = hasPrivileges
   }
 }
