@@ -2,35 +2,25 @@ import SwiftUI
 import ModelKit
 
 public struct MainView: View {
-  let factory: ViewFactory
-  let workflowController: WorkflowController
-
-  var groupStore: GroupStore
-  var workflowStore: WorkflowStore
-
   @ObservedObject var store: ViewKitStore
+  @AppStorage("groupSelection") var groupSelection: String?
+  @AppStorage("workflowSelection") var workflowSelection: String?
+  let groupController: GroupController
 
-  public init(factory: ViewFactory,
-              workflowController: WorkflowController,
-              store: ViewKitStore,
-              groupStore: GroupStore,
-              workflowStore: WorkflowStore) {
-    self.factory = factory
-    self.workflowController = workflowController
+  public init(store: ViewKitStore, groupController: GroupController) {
     self.store = store
-    self.groupStore = groupStore
-    self.workflowStore = workflowStore
+    self.groupController = groupController
   }
 
   @ViewBuilder
   public var body: some View {
     NavigationView {
-      SidebarView(factory: factory, store: store)
-        .navigationViewStyle(DoubleColumnNavigationViewStyle())
+      SidebarView(store: store,
+                  selection: $groupSelection,
+                  workflowSelection: $workflowSelection)
+        .toolbar(content: { GroupListToolbar(groupController: groupController) })
       ListPlaceHolder()
-      DetailView(factory: factory, store: store,
-                 groupStore: groupStore, workflowStore: workflowStore,
-                 workflowController: workflowController)
+      DetailViewPlaceHolder()
     }
   }
 }
@@ -41,9 +31,8 @@ struct MainView_Previews: PreviewProvider, TestPreviewProvider {
   }
 
   static var testPreview: some View {
-    DesignTimeFactory().mainView(
-      store: ViewKitStore(groups: [])
-    )
+    MainView(store: .init(context: .preview()),
+             groupController: GroupPreviewController().erase())
     .frame(width: 960, height: 620, alignment: .leading)
   }
 }

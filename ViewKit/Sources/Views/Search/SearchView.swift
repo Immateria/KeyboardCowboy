@@ -20,7 +20,7 @@ struct SearchView: View {
           }
 
           ForEach(searchController.state.workflows, id: \.self) { workflow in
-            WorkflowListCell(workflow: workflow, selected: false)
+            WorkflowListView(workflow: workflow)
               .frame(height: 48)
               .padding(.horizontal, 10)
               .background(Color(.windowBackgroundColor))

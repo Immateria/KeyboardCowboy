@@ -1,10 +1,10 @@
 import SwiftUI
 import ModelKit
 
-struct WorkflowListCell: View {
+struct WorkflowListView: View {
   let workflow: Workflow
-  @State var isHovering: Bool = false
-  @State var selected: Bool
+  @State private var isHovering: Bool = false
+  @State private var selected: Bool = false
 
   var body: some View {
     VStack(alignment: .center, spacing: 0) {
@@ -15,7 +15,7 @@ struct WorkflowListCell: View {
             numberOfCommands.font(.callout)
             keyboardShortcuts().font(.caption)
           }
-        }
+        }.frame(height: 48)
         Spacer()
         icon
       }.padding(.leading, 10)
@@ -26,7 +26,7 @@ struct WorkflowListCell: View {
 
 // MARK: - Subviews
 
-private extension WorkflowListCell {
+private extension WorkflowListView {
   var name: some View {
     Text(workflow.name)
       .foregroundColor(.primary)
@@ -84,16 +84,16 @@ private extension WorkflowListCell {
 
 // MARK: - Previews
 
-struct WorkflowListCell_Previews: PreviewProvider, TestPreviewProvider {
+struct WorkflowListView_Previews: PreviewProvider, TestPreviewProvider {
   static var previews: some View {
     testPreview.previewAllColorSchemes()
   }
 
   static var testPreview: some View {
     ForEach(ModelFactory().commands()) { command in
-      WorkflowListCell(workflow: ModelFactory().workflowCell(
+      WorkflowListView(workflow: ModelFactory().workflowCell(
         [command], name: command.name
-      ), selected: false)
+      ))
     }
   }
 }

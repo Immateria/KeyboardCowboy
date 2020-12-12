@@ -5,28 +5,38 @@ import ViewKit
 import SwiftUI
 
 class FeatureContext {
-  let applicationProvider: ApplicationsProvider
-  let commandFeature: CommandsFeatureController
-  let factory: ViewFactory
-  let groupsFeature: GroupsFeatureController
-  let keyboardFeature: KeyboardShortcutsFeatureController
-  let searchFeature: SearchFeatureController
-  let workflowFeature: WorkflowFeatureController
+  var applicationProvider: ApplicationsProvider
+  let commands: CommandsFeatureController
+  let groups: GroupsFeatureController
+  let keyboardsShortcuts: KeyboardShortcutsFeatureController
+  let openPanel: OpenPanelController
+  let search: SearchFeatureController
+  let workflow: WorkflowFeatureController
 
   init(applicationProvider: ApplicationsProvider,
        commandFeature: CommandsFeatureController,
-       factory: ViewFactory,
        groupsFeature: GroupsFeatureController,
        keyboardFeature: KeyboardShortcutsFeatureController,
+       openPanel: OpenPanelController,
        searchFeature: SearchFeatureController,
        workflowFeature: WorkflowFeatureController) {
     self.applicationProvider = applicationProvider
-    self.commandFeature = commandFeature
-    self.factory = factory
-    self.groupsFeature = groupsFeature
-    self.keyboardFeature = keyboardFeature
-    self.searchFeature = searchFeature
-    self.workflowFeature = workflowFeature
+    self.commands = commandFeature
+    self.groups = groupsFeature
+    self.keyboardsShortcuts = keyboardFeature
+    self.openPanel = openPanel
+    self.search = searchFeature
+    self.workflow = workflowFeature
+  }
+
+  func viewKitContext() -> ViewKitFeatureContext {
+    ViewKitFeatureContext.init(applicationProvider: applicationProvider.erase(),
+                               commands: commands.erase(),
+                               groups: groups.erase(),
+                               keyboardsShortcuts: keyboardsShortcuts.erase(),
+                               openPanel: openPanel.erase(),
+                               search: search.erase(),
+                               workflow: workflow.erase())
   }
 }
 
@@ -47,10 +57,11 @@ final class FeatureFactory {
     MenubarController()
   }
 
-  func featureContext(groupStore: GroupStore, workflowStore: WorkflowStore) -> FeatureContext {
+  func featureContext() -> FeatureContext {
     let applicationProvider = ApplicationsProvider(applications: coreController.installedApplications)
     let commandsController = commandsFeature(commandController: coreController.commandController)
-    let groupFeatureController = groupFeature(groupStore: groupStore, workflowStore: workflowStore)
+    let openPanelController = OpenPanelViewController()
+    let groupFeatureController = groupFeature()
     let keyboardController = keyboardShortcutFeature()
     let searchController = searchFeature()
     let workflowController = workflowFeature()
@@ -59,26 +70,16 @@ final class FeatureFactory {
     keyboardController.delegate = workflowController
     commandsController.delegate = workflowController
 
-    let factory = AppViewFactory(applicationProvider: applicationProvider.erase(),
-                                 commandController: commandsController.erase(),
-                                 groupController: groupFeatureController.erase(),
-                                 keyboardShortcutController: keyboardController.erase(),
-                                 openPanelController: OpenPanelViewController().erase(),
-                                 searchController: searchController.erase(),
-                                 workflowController: workflowController.erase(),
-                                 groupStore: groupStore,
-                                 workflowStore: workflowStore)
-
     return FeatureContext(applicationProvider: applicationProvider,
-            commandFeature: commandsController,
-            factory: factory,
-            groupsFeature: groupFeatureController,
-            keyboardFeature: keyboardController,
-            searchFeature: searchController,
-            workflowFeature: workflowController)
+                          commandFeature: commandsController,
+                          groupsFeature: groupFeatureController,
+                          keyboardFeature: keyboardController,
+                          openPanel: openPanelController.erase(),
+                          searchFeature: searchController,
+                          workflowFeature: workflowController)
   }
 
-  func groupFeature(groupStore: GroupStore, workflowStore: WorkflowStore) -> GroupsFeatureController {
+  func groupFeature() -> GroupsFeatureController {
     GroupsFeatureController(
       groupsController: groupsController,
       applications: installedApplications
@@ -86,16 +87,11 @@ final class FeatureFactory {
   }
 
   func workflowFeature() -> WorkflowFeatureController {
-    WorkflowFeatureController(
-      state: Workflow(
-        id: "", name: "",
-        keyboardShortcuts: [], commands: []),
-      applications: installedApplications,
-      groupsController: groupsController)
+    WorkflowFeatureController(applications: installedApplications)
   }
 
   func keyboardShortcutFeature() -> KeyboardShortcutsFeatureController {
-    KeyboardShortcutsFeatureController(groupsController: groupsController)
+    KeyboardShortcutsFeatureController()
   }
 
   func commandsFeature(commandController: CommandControlling) -> CommandsFeatureController {
@@ -108,9 +104,10 @@ final class FeatureFactory {
   func searchFeature() -> SearchFeatureController {
     let root = SearchRootController(groupsController: groupsController,
                                     groupSearch: SearchGroupsController())
-    let feature = SearchFeatureController(searchController: root,
-                                          groupController: groupsController,
-                                          query: .constant(""))
+    let feature = SearchFeatureController(
+      groupController: groupsController,
+      searchController: root,
+      query: .constant(""))
     return feature
   }
 }

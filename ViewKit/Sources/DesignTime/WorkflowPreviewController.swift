@@ -1,6 +1,5 @@
 import ModelKit
 
-final class WorkflowPreviewController: ViewController {
-  let state = ModelFactory().workflowList().first
+final class WorkflowPreviewController: ActionController {
   func perform(_ action: WorkflowList.Action) {}
 }

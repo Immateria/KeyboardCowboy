@@ -3,9 +3,7 @@ import ModelKit
 import ViewKit
 
 struct KeyboardCowboyCommands: Commands {
-  @ObservedObject var groupStore: GroupStore
-  @ObservedObject var workflowStore: WorkflowStore
-  let context: FeatureContext
+  let store: Saloon
 
   private var firstResponder: NSResponder? { NSApp.keyWindow?.firstResponder }
 
@@ -29,31 +27,25 @@ struct KeyboardCowboyCommands: Commands {
     })
 
     CommandGroup(replacing: CommandGroupPlacement.newItem, addition: {
-      if let group = groupStore.group {
+      if let group = store.selectedGroup {
         Button("New Workflow") {
-          context.workflowFeature.perform(.createWorkflow(in: group))
+          store.context.workflow.perform(.create(groupId: group.id))
         }.keyboardShortcut("n", modifiers: [.command])
       }
 
-      if let workflow = workflowStore.workflow {
+      if let workflow = store.selectedWorkflow {
         Button("New Keyboard shortcut") {
-
-          context.keyboardFeature.perform(.createKeyboardShortcut(
-                                            ModelKit.KeyboardShortcut.empty(),
-                                            index: 999,
-                                            in: workflow))
+          store.context.keyboardsShortcuts.perform(
+            .create(ModelKit.KeyboardShortcut.empty(), offset: 999, in: workflow))
         }.keyboardShortcut("k", modifiers: [.command])
-      }
 
-      if let workflow = workflowStore.workflow {
         Button("New Command") {
-          context.commandFeature.perform(.createCommand(Command.application(.empty()), in: workflow))
+          store.context.commands.perform(.create(Command.application(.empty()), in: workflow))
         }.keyboardShortcut("n", modifiers: [.control, .option, .command])
       }
-
       Button("New Group") {
-        context.groupsFeature.perform(.createGroup)
-      }.keyboardShortcut("N", modifiers: [.command, .shift])
+        store.context.groups.perform(.createGroup)
+      }.keyboardShortcut("N", modifiers: [.command])
     })
 
     CommandGroup(after: CommandGroupPlacement.toolbar, addition: {

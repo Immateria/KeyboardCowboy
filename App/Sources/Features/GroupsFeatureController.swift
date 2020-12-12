@@ -5,17 +5,21 @@ import ViewKit
 import ModelKit
 import SwiftUI
 
-final class GroupsFeatureController: ViewController,
+enum GroupsFeatureError: Error {
+  case unableToFindGroup
+}
+
+final class GroupsFeatureController: ActionController,
                                      WorkflowFeatureControllerDelegate {
+  @AppStorage("groupSelection") var groupSelection: String?
+  @AppStorage("workflowSelection") var workflowSelection: String?
   var subject = PassthroughSubject<[ModelKit.Group], Never>()
-  var state = [ModelKit.Group]()
   var applications = [Application]()
   let groupsController: GroupsControlling
 
   init(groupsController: GroupsControlling, applications: [Application]) {
     self.applications = applications
     self.groupsController = groupsController
-    self.state = groupsController.groups
   }
 
   // MARK: ViewController
@@ -39,22 +43,16 @@ final class GroupsFeatureController: ViewController,
 
   // MARK: Private methods
 
-  private func reload(_ groups: [ModelKit.Group], then handler: ((UserSelection) -> Void)? = nil) {
+  private func reload(_ groups: [ModelKit.Group]) {
     groupsController.reloadGroups(groups)
     subject.send(groups)
-    self.state = groups
-//    handler?(self.userSelection)
   }
 
   private func newGroup() {
     let group = ModelKit.Group.empty()
     var groups = groupsController.groups
     groups.append(group)
-
-    reload(groups) { userSelection in
-      userSelection.group = group
-      userSelection.workflow = group.workflows.first
-    }
+    reload(groups)
   }
 
   private func processUrl(_ url: URL) {
@@ -65,10 +63,7 @@ final class GroupsFeatureController: ViewController,
     var groups = groupsController.groups
     let group = Group.droppedApplication(application)
     groups.append(group)
-    reload(groups) { userSelection in
-      userSelection.group = group
-      userSelection.workflow = nil
-    }
+    reload(groups)
   }
 
   private func move(from: Int, to: Int) {
@@ -85,71 +80,83 @@ final class GroupsFeatureController: ViewController,
     } else {
       groups.insert(group, at: max(newIndex, 0))
     }
-    reload(groups) { userSelection in
-      userSelection.group = group
-    }
+    reload(groups)
   }
 
   private func save(_ group: ModelKit.Group) {
     var groups = groupsController.groups
     try? groups.replace(group)
-    reload(groups) { userSelection in
-      userSelection.group = group
-    }
+    reload(groups)
   }
 
   private func delete(_ group: ModelKit.Group) {
     var groups = groupsController.groups
     try? groups.remove(group)
-    reload(groups) { userSelection in
-      userSelection.group = groups.first
-      userSelection.workflow = groups.first?.workflows.first
+    reload(groups)
+  }
+
+  private func findGroup(for workflow: Workflow) throws -> ModelKit.Group {
+    guard let group = groupsController.groups.first(where: {
+      $0.workflows.first(where: { $0.id == workflow.id }) != nil
+    }) else {
+      throw GroupsFeatureError.unableToFindGroup
     }
+    return group
   }
 
   // MARK: WorkflowFeatureControllerDelegate
 
   func workflowFeatureController(_ controller: WorkflowFeatureController,
                                  didCreateWorkflow workflow: Workflow,
-                                 in group: ModelKit.Group) {
-    var groups = self.groupsController.groups
-    try? groups.replace(group)
-    reload(groups) { userSelection in
-      userSelection.group = group
-      userSelection.workflow = workflow
+                                 groupId: String) throws {
+    guard var group = groupsController.groups.first(where: { $0.id == groupId }) else {
+      return
     }
+    var groups = self.groupsController.groups
+    group.workflows.add(workflow)
+    try groups.replace(group)
+    reload(groups)
   }
 
   func workflowFeatureController(_ controller: WorkflowFeatureController,
-                                 didUpdateWorkflow workflow: Workflow,
-                                 in group: ModelKit.Group) {
+                                 didUpdateWorkflow workflow: Workflow) throws {
+    workflowSelection = workflow.id
+
+    var group = try findGroup(for: workflow)
     var groups = self.groupsController.groups
-    try? groups.replace(group)
-    reload(groups) { userSelection in
-      userSelection.group = group
-      userSelection.workflow = workflow
-    }
+    try group.workflows.replace(workflow)
+    try groups.replace(group)
+    reload(groups)
   }
 
   func workflowFeatureController(_ controller: WorkflowFeatureController,
-                                 didDeleteWorkflow workflow: Workflow,
-                                 in group: ModelKit.Group) {
+                                 didDeleteWorkflow workflow: Workflow) throws {
+    var group = try findGroup(for: workflow)
     var groups = self.groupsController.groups
-    try? groups.replace(group)
-    reload(groups) { userSelection in
-      userSelection.group = group
-      userSelection.workflow = group.workflows.first
-    }
+    try group.workflows.remove(workflow)
+    try groups.replace(group)
+    reload(groups)
   }
 
   func workflowFeatureController(_ controller: WorkflowFeatureController,
                                  didMoveWorkflow workflow: Workflow,
-                                 in group: ModelKit.Group) {
+                                 to offset: Int) throws {
+    var group = try findGroup(for: workflow)
     var groups = self.groupsController.groups
-    try? groups.replace(group)
-    reload(groups, then: { userSelection in
-      userSelection.group = group
-      userSelection.workflow = workflow
-    })
+    try group.workflows.move(workflow, to: offset)
+    try groups.replace(group)
+    reload(groups)
+  }
+
+  func workflowFeatureController(_ controller: WorkflowFeatureController,
+                                 didDropWorkflow workflow: Workflow,
+                                 groupId: String) throws {
+    guard var group = groupsController.groups.first(where: { $0.id == groupId }) else {
+      return
+    }
+    var groups = self.groupsController.groups
+    group.workflows.add(workflow)
+    try groups.replace(group)
+    reload(groups)
   }
 }

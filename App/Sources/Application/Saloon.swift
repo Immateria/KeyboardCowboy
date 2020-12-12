@@ -38,9 +38,7 @@ class Saloon: ViewKitStore {
 
   private let storageController: StorageControlling
 
-  private(set) var context: FeatureContext?
-  private(set) var groupStore: GroupStore
-  private(set) var workflowStore: WorkflowStore
+  private(set) var context: ViewKitFeatureContext
 
   private var coreController: CoreController?
   private var settingsController: SettingsController?
@@ -49,17 +47,10 @@ class Saloon: ViewKitStore {
   @Published var state: ApplicationState = .launching(LaunchView())
 
   init() {
-    let groupStore = GroupStore(group: nil)
-    let workflowStore = WorkflowStore(workflow: nil)
     let configuration = Configuration.Storage()
-
-    self.groupStore = groupStore
-    self.workflowStore = workflowStore
     self.storageController = Self.factory.storageController(
       path: configuration.path,
       fileName: configuration.fileName)
-
-    super.init(groups: [])
 
     do {
       let groups = try storageController.load()
@@ -67,20 +58,21 @@ class Saloon: ViewKitStore {
       let coreController = Self.factory.coreController(
         disableKeyboardShortcuts: launchArguments.isEnabled(.disableKeyboardShortcuts),
         groupsController: groupsController)
-      let context = FeatureFactory(coreController: coreController)
-        .featureContext(groupStore: groupStore,
-                        workflowStore: workflowStore)
 
-      groupStore.group = groups.first
-      workflowStore.workflow = groups.first?.workflows.first
+      let context = FeatureFactory(coreController: coreController).featureContext()
+      let viewKitContext = context.viewKitContext()
+
+      self.context = viewKitContext
+      super.init(groups: groups, context: viewKitContext)
 
       observeNotifications()
       subscribe(context)
-      state = .content(context.factory.mainView(store: self))
-      self.context = context
-      self.groups = groups
+
+      self.state = .content(MainView(store: self, groupController: viewKitContext.groups))
     } catch let error {
       AppDelegateErrorController.handle(error)
+      self.context = ViewKitFeatureContext.preview()
+      super.init(groups: [], context: context)
     }
   }
 
@@ -96,26 +88,40 @@ class Saloon: ViewKitStore {
   }
 
   private func subscribe(_ context: FeatureContext) {
-    context.groupsFeature.subject
+    context.groups.subject
+      .receive(on: DispatchQueue.main)
+      .sink { groups in
+        self.groups = groups
+      }.store(in: &subscriptions)
+
+    context.groups.subject
       .debounce(for: 0.5, scheduler: RunLoop.main)
-      .throttle(for: 2.0, scheduler: RunLoop.main, latest: true)
       .removeDuplicates()
       .receive(on: DispatchQueue.global(qos: .userInitiated))
       .sink { groups in
         self.saveGroupsToDisk(groups)
-        DispatchQueue.main.async {
-          self.groups = groups
-        }
       }
       .store(in: &subscriptions)
+
+    UserDefaults.standard.publisher(for: \.groupSelection).sink { newValue in
+      guard let newValue = newValue else {
+        return
+      }
+      self.selectedGroup = self.groups.first(where: { $0.id == newValue })
+    }.store(in: &subscriptions)
+
+    UserDefaults.standard.publisher(for: \.workflowSelection).sink { newValue in
+      guard let newValue = newValue else {
+        self.selectedWorkflow = nil
+        return
+      }
+      self.selectedWorkflow = self.groups.flatMap({ $0.workflows }).first(where: { $0.id == newValue })
+    }.store(in: &subscriptions)
   }
 
   private func saveGroupsToDisk(_ groups: [ModelKit.Group]) {
     do {
       try storageController.save(groups)
-      DispatchQueue.main.async {
-        self.groups = groups
-      }
     } catch let error {
       AppDelegateErrorController.handle(error)
     }

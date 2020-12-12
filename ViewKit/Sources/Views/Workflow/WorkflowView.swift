@@ -2,14 +2,29 @@ import SwiftUI
 import ModelKit
 
 struct WorkflowConfig {
-  var name: String
+  var name: String {
+    get { workflow.name }
+    set { workflow.name = newValue }
+  }
+  private(set) var workflow: Workflow
 }
 
 public struct WorkflowView: View {
+  let workflowController: WorkflowController
   @State var config: WorkflowConfig
 
+  init(_ workflow: Workflow, workflowController: WorkflowController) {
+    _config = .init(initialValue: WorkflowConfig(workflow: workflow))
+    self.workflowController = workflowController
+  }
+
   public var body: some View {
-    TextField("", text: $config.name)
+    TextField("", text: $config.name, onCommit: {
+      workflowController.perform(.update(config.workflow))
+    })
+      .font(.largeTitle)
+      .foregroundColor(.primary)
+      .textFieldStyle(PlainTextFieldStyle())
   }
 }
 
@@ -21,9 +36,8 @@ struct WorkflowView_Previews: PreviewProvider, TestPreviewProvider {
   }
 
   static var testPreview: some View {
-    DesignTimeFactory().workflowDetail(
-      .constant(ModelFactory().workflowDetail()),
-      group: .constant(ModelFactory().groupList().first!))
+    WorkflowView(ModelFactory().workflowDetail(),
+                 workflowController: WorkflowPreviewController().erase())
       .frame(height: 668)
   }
 }

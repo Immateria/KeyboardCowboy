@@ -19,9 +19,7 @@ struct KeyboardCowboyApp: App {
     }
     .windowToolbarStyle(UnifiedWindowToolbarStyle())
     .commands {
-      KeyboardCowboyCommands(groupStore: store.groupStore,
-                             workflowStore: store.workflowStore,
-                             context: store.context!)
+      KeyboardCowboyCommands(store: store)
     }
 
     Settings {

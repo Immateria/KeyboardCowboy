@@ -2,18 +2,17 @@ import ModelKit
 import SwiftUI
 
 struct WorkflowListToolbar: ToolbarContent {
-  let group: ModelKit.Group
+  let groupId: String?
   let workflowController: WorkflowController
 
   var body: some ToolbarContent {
     ToolbarItemGroup(placement: .primaryAction) {
-      Button(action: { workflowController.perform(.createWorkflow(in: group)) },
+      Button(action: { workflowController.perform(.create(groupId: groupId)) },
              label: {
               Image(systemName: "rectangle.stack.badge.plus")
                 .renderingMode(.template)
                 .foregroundColor(Color(.systemGray))
              })
-        .help("Add Workflow to \"\(group.name)\"")
     }
   }
 }

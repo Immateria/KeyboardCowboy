@@ -21,22 +21,16 @@ protocol KeyboardShortcutsFeatureControllerDelegate: AnyObject {
 final class KeyboardShortcutsFeatureController: ActionController {
   weak var delegate: KeyboardShortcutsFeatureControllerDelegate?
 
-  let groupsController: GroupsControlling
-
-  init(groupsController: GroupsControlling) {
-    self.groupsController = groupsController
-  }
-
-  func perform(_ action: KeyboardShortcutList.Action) {
+  func perform(_ action: KeyboardShortcutList.UIAction) {
     switch action {
-    case .createKeyboardShortcut(let keyboardShortcut, let index, let workflow):
-      createKeyboardShortcut(keyboardShortcut, at: index, in: workflow)
-    case .updateKeyboardShortcut(let keyboardShortcut, let workflow):
-      updateKeyboardShortcut(keyboardShortcut, in: workflow)
-    case .deleteKeyboardShortcut(let keyboardShortcut, let workflow):
-      deleteKeyboardShortcut(keyboardShortcut, in: workflow)
-    case .moveCommand(let keyboardShortcut, let to, let workflow):
-      moveKeyboardShortcut(keyboardShortcut, to: to, in: workflow)
+    case .create(let shortcut, let offset, let workflow):
+      createKeyboardShortcut(shortcut, at: offset, in: workflow)
+    case .update(let shortcut, let workflow):
+      updateKeyboardShortcut(shortcut, in: workflow)
+    case .delete(let shortcut, let workflow):
+      deleteKeyboardShortcut(shortcut, in: workflow)
+    case .move(let shortcut, let offset, let workflow):
+      moveKeyboardShortcut(shortcut, to: offset, in: workflow)
     }
   }
 
