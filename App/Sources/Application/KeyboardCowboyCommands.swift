@@ -33,14 +33,14 @@ struct KeyboardCowboyCommands: Commands {
         }.keyboardShortcut("n", modifiers: [.command])
       }
 
-      if let workflow = store.selectedWorkflow {
+      if store.selectedWorkflow != nil {
         Button("New Keyboard shortcut") {
           store.context.keyboardsShortcuts.perform(
-            .create(ModelKit.KeyboardShortcut.empty(), offset: 999, in: workflow))
+            .create(ModelKit.KeyboardShortcut.empty(), offset: 999, in: store.context.workflow.state))
         }.keyboardShortcut("k", modifiers: [.command])
 
         Button("New Command") {
-          store.context.commands.perform(.create(Command.application(.empty()), in: workflow))
+          store.context.commands.perform(.create(Command.application(.empty()), in: store.context.workflow.state))
         }.keyboardShortcut("n", modifiers: [.control, .option, .command])
       }
       Button("New Group") {

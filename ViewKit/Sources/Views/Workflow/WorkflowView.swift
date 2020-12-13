@@ -10,17 +10,17 @@ struct WorkflowConfig {
 }
 
 public struct WorkflowView: View {
-  let workflowController: WorkflowController
+  let onUpdate: (WorkflowConfig) -> Void
   @State var config: WorkflowConfig
 
-  init(_ workflow: Workflow, workflowController: WorkflowController) {
+  init(_ workflow: Workflow, onUpdate: @escaping (WorkflowConfig) -> Void) {
     _config = .init(initialValue: WorkflowConfig(workflow: workflow))
-    self.workflowController = workflowController
+    self.onUpdate = onUpdate
   }
 
   public var body: some View {
     TextField("", text: $config.name, onCommit: {
-      workflowController.perform(.update(config.workflow))
+      onUpdate(config)
     })
       .font(.largeTitle)
       .foregroundColor(.primary)
@@ -36,8 +36,7 @@ struct WorkflowView_Previews: PreviewProvider, TestPreviewProvider {
   }
 
   static var testPreview: some View {
-    WorkflowView(ModelFactory().workflowDetail(),
-                 workflowController: WorkflowPreviewController().erase())
+    WorkflowView(ModelFactory().workflowDetail()) { _  in }
       .frame(height: 668)
   }
 }

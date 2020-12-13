@@ -21,9 +21,10 @@ protocol WorkflowFeatureControllerDelegate: AnyObject {
                                  groupId: String) throws
 }
 
-final class WorkflowFeatureController: ActionController,
+final class WorkflowFeatureController: ViewController,
                                        CommandsFeatureControllerDelegate,
                                        KeyboardShortcutsFeatureControllerDelegate {
+  @Published var state: Workflow = .empty()
   weak var delegate: WorkflowFeatureControllerDelegate?
   var applications = [Application]()
   private var cancellables = [AnyCancellable]()
@@ -36,6 +37,8 @@ final class WorkflowFeatureController: ActionController,
 
   func perform(_ action: WorkflowList.Action) {
     switch action {
+    case .set(let workflow):
+      self.state = workflow
     case .create(let groupId):
       createWorkflow(groupId)
     case .update(let workflow):
@@ -59,6 +62,7 @@ final class WorkflowFeatureController: ActionController,
 
   private func updateWorkflow(_ workflow: Workflow) {
     try? delegate?.workflowFeatureController(self, didUpdateWorkflow: workflow)
+    perform(.set(workflow: workflow))
   }
 
   private func deleteWorkflow(_ workflow: Workflow) {

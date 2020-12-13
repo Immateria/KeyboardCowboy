@@ -87,12 +87,12 @@ extension CommandListView {
             selection = command
           }
           .overlay(
-              RoundedRectangle(cornerRadius: 8)
-                .stroke(selection == command
-                          ? Color(.controlAccentColor)
-                          : Color(.windowFrameTextColor),
-                        lineWidth: 1)
-                .opacity(selection == command ? 1.0 : 0.05)
+            RoundedRectangle(cornerRadius: 8)
+              .stroke(selection == command
+                        ? Color(.controlAccentColor)
+                        : Color(.windowFrameTextColor),
+                      lineWidth: 1)
+              .opacity(selection == command ? 1.0 : 0.05)
           )
           .padding(.horizontal)
           .shadow(color: Color(.shadowColor).opacity(0.05), radius: 10, x: 0, y: 12.5)

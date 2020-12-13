@@ -7,18 +7,28 @@ struct DetailToolbarConfig {
 }
 
 struct DetailView: View {
-  @AppStorage("groupSelection") var groupSelection: String?
+  let context: ViewKitFeatureContext
   @State private var sheet: CommandListView.Sheet?
   @State private var config = DetailToolbarConfig()
   @State private var isDropping: Bool = false
-  let context: ViewKitFeatureContext
-  let workflow: Workflow
+  @Binding var workflow: Workflow
+
+  init(context: ViewKitFeatureContext, workflow: Workflow) {
+    self.context = context
+    context.workflow.perform(.set(workflow: workflow))
+    _workflow = Binding<Workflow>(
+      get: { context.workflow.state },
+      set: { context.workflow.perform(.update($0)) })
+  }
 
   var body: some View {
     ScrollView {
       VStack {
         VStack {
-          WorkflowView(workflow, workflowController: context.workflow)
+          WorkflowView(workflow) { config in
+            workflow.name = config.name
+            context.workflow.perform(.update(workflow))
+          }
           KeyboardShortcutList(workflow: workflow,
                                performAction: context.keyboardsShortcuts.perform(_:))
             .cornerRadius(8)
@@ -66,7 +76,8 @@ extension DetailView {
   func receive(_ action: CommandListView.Sheet) -> some View {
     switch action {
     case .create(let command):
-      EditCommandView(applicationProvider: context.applicationProvider, openPanelController: context.openPanel,
+      EditCommandView(applicationProvider: context.applicationProvider,
+                      openPanelController: context.openPanel,
                       saveAction: { newCommand in
                         context.commands.perform(.create(newCommand, in: workflow))
                         sheet = nil

@@ -3,6 +3,7 @@ import ModelKit
 
 public struct WorkflowList: View {
   public enum Action {
+    case set(workflow: Workflow)
     case create(groupId: String?)
     case update(Workflow)
     case delete(Workflow)
