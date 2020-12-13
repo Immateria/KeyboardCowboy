@@ -61,8 +61,8 @@ final class WorkflowFeatureController: ViewController,
   }
 
   private func updateWorkflow(_ workflow: Workflow) {
-    try? delegate?.workflowFeatureController(self, didUpdateWorkflow: workflow)
     perform(.set(workflow: workflow))
+    try? delegate?.workflowFeatureController(self, didUpdateWorkflow: workflow)
   }
 
   private func deleteWorkflow(_ workflow: Workflow) {

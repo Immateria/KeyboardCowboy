@@ -16,6 +16,7 @@ class FeatureContext {
   init(applicationProvider: ApplicationsProvider,
        commandFeature: CommandsFeatureController,
        groupsFeature: GroupsFeatureController,
+       keyInputSubjectWrapper: KeyInputSubjectWrapper,
        keyboardFeature: KeyboardShortcutsFeatureController,
        openPanel: OpenPanelController,
        searchFeature: SearchFeatureController,
@@ -29,10 +30,11 @@ class FeatureContext {
     self.workflow = workflowFeature
   }
 
-  func viewKitContext() -> ViewKitFeatureContext {
+  func viewKitContext(keyInputSubjectWrapper: KeyInputSubjectWrapper) -> ViewKitFeatureContext {
     ViewKitFeatureContext.init(applicationProvider: applicationProvider.erase(),
                                commands: commands.erase(),
                                groups: groups.erase(),
+                               keyInputSubjectWrapper: keyInputSubjectWrapper,
                                keyboardsShortcuts: keyboardsShortcuts.erase(),
                                openPanel: openPanel.erase(),
                                search: search.erase(),
@@ -57,7 +59,7 @@ final class FeatureFactory {
     MenubarController()
   }
 
-  func featureContext() -> FeatureContext {
+  func featureContext(keyInputSubjectWrapper: KeyInputSubjectWrapper) -> FeatureContext {
     let applicationProvider = ApplicationsProvider(applications: coreController.installedApplications)
     let commandsController = commandsFeature(commandController: coreController.commandController)
     let openPanelController = OpenPanelViewController()
@@ -73,6 +75,7 @@ final class FeatureFactory {
     return FeatureContext(applicationProvider: applicationProvider,
                           commandFeature: commandsController,
                           groupsFeature: groupFeatureController,
+                          keyInputSubjectWrapper: keyInputSubjectWrapper,
                           keyboardFeature: keyboardController,
                           openPanel: openPanelController.erase(),
                           searchFeature: searchController,

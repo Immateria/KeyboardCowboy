@@ -21,9 +21,9 @@ public struct CommandListView: View {
 
   @Environment(\.colorScheme) var colorScheme
 
-  @State private var selection: Command?
+  @Binding var selection: Command?
 
-  let workflow: Workflow
+  @Binding var workflow: Workflow
   let perform: (Action) -> Void
   let receive: (Sheet) -> Void
 
@@ -124,7 +124,8 @@ struct CommandListView_Previews: PreviewProvider, TestPreviewProvider {
   }
 
   static var testPreview: some View {
-    CommandListView(workflow: ModelFactory().workflowDetail(),
+    CommandListView(selection: .constant(nil),
+                    workflow: .constant(ModelFactory().workflowDetail()),
                     perform: { _ in },
                     receive: { _ in })
   }

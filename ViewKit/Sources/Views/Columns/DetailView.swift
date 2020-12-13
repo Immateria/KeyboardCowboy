@@ -8,6 +8,8 @@ struct DetailToolbarConfig {
 
 struct DetailView: View {
   let context: ViewKitFeatureContext
+  @EnvironmentObject private var keyInputSubjectWrapper: KeyInputSubjectWrapper
+  @State private var selectedCommand: Command?
   @State private var sheet: CommandListView.Sheet?
   @State private var config = DetailToolbarConfig()
   @State private var isDropping: Bool = false
@@ -15,7 +17,6 @@ struct DetailView: View {
 
   init(context: ViewKitFeatureContext, workflow: Workflow) {
     self.context = context
-    context.workflow.perform(.set(workflow: workflow))
     _workflow = Binding<Workflow>(
       get: { context.workflow.state },
       set: { context.workflow.perform(.update($0)) })
@@ -29,17 +30,23 @@ struct DetailView: View {
             workflow.name = config.name
             context.workflow.perform(.update(workflow))
           }
-          KeyboardShortcutList(workflow: workflow,
+          KeyboardShortcutList(workflow: $workflow,
                                performAction: context.keyboardsShortcuts.perform(_:))
             .cornerRadius(8)
         }.padding()
-      }.background(Color(.textBackgroundColor))
+      }
+      .padding([.leading, .trailing, .bottom])
+      .background(Color(.textBackgroundColor))
 
       VStack {
-        CommandListView(workflow: workflow,
+        CommandListView(selection: $selectedCommand,
+                        workflow: $workflow,
                         perform: context.commands.perform(_:),
                         receive: { sheet = $0 })
-      }.onDrop($isDropping) { urls in
+          .onReceive(context.keyInputSubjectWrapper, perform: receive(_:))
+      }
+      .padding()
+      .onDrop($isDropping) { urls in
         context.commands.perform(.drop(urls, workflow))
       }.overlay(
         RoundedRectangle(cornerRadius: 8)
@@ -95,6 +102,27 @@ extension DetailView {
                       selection: command,
                       command: command)
     }
+  }
+
+  func receive(_ subject: KeyInputSubjectWrapper.Output) {
+    guard let command = selectedCommand,
+          let index = workflow.commands.firstIndex(of: command) else { return }
+
+    let newIndex: Int
+
+    switch subject {
+    case .delete:
+      context.commands.perform(.delete(command, in: workflow))
+      return
+    case .upArrow:
+      newIndex = max(index - 1, 0)
+    case .downArrow:
+      newIndex = min(index + 1, workflow.commands.count - 1)
+    default:
+      return
+    }
+
+    selectedCommand = workflow.commands[newIndex]
   }
 }
 

@@ -59,8 +59,9 @@ class Saloon: ViewKitStore {
         disableKeyboardShortcuts: launchArguments.isEnabled(.disableKeyboardShortcuts),
         groupsController: groupsController)
 
-      let context = FeatureFactory(coreController: coreController).featureContext()
-      let viewKitContext = context.viewKitContext()
+      let context = FeatureFactory(coreController: coreController).featureContext(
+        keyInputSubjectWrapper: Self.keyInputSubject)
+      let viewKitContext = context.viewKitContext(keyInputSubjectWrapper: Self.keyInputSubject)
 
       self.context = viewKitContext
       super.init(groups: groups, context: viewKitContext)
@@ -115,7 +116,11 @@ class Saloon: ViewKitStore {
         self.selectedWorkflow = nil
         return
       }
-      self.selectedWorkflow = self.groups.flatMap({ $0.workflows }).first(where: { $0.id == newValue })
+      let selectedWorkflow = self.groups.flatMap({ $0.workflows }).first(where: { $0.id == newValue })
+      if let selectedWorkflow = selectedWorkflow {
+        context.workflow.perform(.set(workflow: selectedWorkflow))
+      }
+      self.selectedWorkflow = selectedWorkflow
     }.store(in: &subscriptions)
   }
 

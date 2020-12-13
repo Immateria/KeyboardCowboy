@@ -9,7 +9,7 @@ public struct KeyboardShortcutList: View {
     case delete(ModelKit.KeyboardShortcut, in: Workflow)
   }
 
-  let workflow: Workflow
+  @Binding var workflow: Workflow
   let performAction: (UIAction) -> Void
 
   public var body: some View {
@@ -91,7 +91,7 @@ struct KeyboardShortcutList_Previews: PreviewProvider, TestPreviewProvider {
   }
 
   static var testPreview: some View {
-    KeyboardShortcutList(workflow: ModelFactory().workflowDetail())
+    KeyboardShortcutList(workflow: .constant(ModelFactory().workflowDetail()))
       { _ in }
   }
 }

@@ -4,6 +4,7 @@ import ModelKit
 
 @main
 struct KeyboardCowboyApp: App {
+
   @StateObject private var store = Saloon()
   @Environment(\.scenePhase) var scenePhase
 
@@ -19,7 +20,7 @@ struct KeyboardCowboyApp: App {
     }
     .windowToolbarStyle(UnifiedWindowToolbarStyle())
     .commands {
-      KeyboardCowboyCommands(store: store)
+      KeyboardCowboyCommands(store: store, keyInputSubject: Saloon.keyInputSubject)
     }
 
     Settings {

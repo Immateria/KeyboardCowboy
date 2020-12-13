@@ -4,6 +4,7 @@ import ViewKit
 
 struct KeyboardCowboyCommands: Commands {
   let store: Saloon
+  let keyInputSubject: KeyInputSubjectWrapper
 
   private var firstResponder: NSResponder? { NSApp.keyWindow?.firstResponder }
 
@@ -17,14 +18,32 @@ struct KeyboardCowboyCommands: Commands {
         firstResponder?.tryToPerform(#selector(NSText.paste(_:)), with: nil)
       }.keyboardShortcut("v", modifiers: [.command])
 
-      Button("Delete") {
+      keyInput(.delete, name: "Delete") {
         firstResponder?.tryToPerform(#selector(NSText.delete(_:)), with: nil)
-      }.keyboardShortcut(.delete, modifiers: [])
+      }
 
       Button("Select All") {
         firstResponder?.tryToPerform(#selector(NSText.selectAll(_:)), with: nil)
       }.keyboardShortcut("a", modifiers: [.command])
     })
+
+    CommandMenu("Navigation") {
+      keyInput(.upArrow, name: "Select Previous") {
+        guard let cgEvent = CGEvent(keyboardEventSource: nil, virtualKey: 126, keyDown: false) else {
+          return
+        }
+        let event = NSEvent.init(cgEvent: cgEvent)
+        firstResponder?.tryToPerform(#selector(NSApplication.keyDown(with:)), with: event)
+      }
+
+      keyInput(.downArrow, name: "Select Next") {
+        guard let cgEvent = CGEvent(keyboardEventSource: nil, virtualKey: 125, keyDown: false) else {
+          return
+        }
+        let event = NSEvent.init(cgEvent: cgEvent)
+        firstResponder?.tryToPerform(#selector(NSApplication.keyDown(with:)), with: event)
+      }
+    }
 
     CommandGroup(replacing: CommandGroupPlacement.newItem, addition: {
       if let group = store.selectedGroup {
@@ -54,5 +73,12 @@ struct KeyboardCowboyCommands: Commands {
           #selector(NSSplitViewController.toggleSidebar(_:)), with: nil)
       }.keyboardShortcut("S")
     })
+  }
+
+  func keyInput(_ key: KeyEquivalent, name: String, modifiers: EventModifiers = [],
+                fallbackEvent: @escaping () -> Void) -> some View {
+    return keyboardShortcut(key, name: name, sender: keyInputSubject,
+                            modifiers: modifiers,
+                            fallbackEvent: fallbackEvent)
   }
 }
