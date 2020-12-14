@@ -16,7 +16,12 @@ import SwiftUI
  */
 typealias KeyboardCowboyStore = Saloon
 
-class Saloon: ViewKitStore {
+let bundleIdentifier = Bundle.main.bundleIdentifier!
+
+class Saloon: ViewKitStore, MenubarControllerDelegate {
+  static let enableNotification = Notification.Name("enableHotKeys")
+  static let disableNotification = Notification.Name("disableHotKeys")
+
   enum ApplicationState {
     case launching(LaunchView)
     case needsPermission(PermissionsView)
@@ -40,9 +45,12 @@ class Saloon: ViewKitStore {
 
   private(set) var context: ViewKitFeatureContext
 
+  private var featureContext: FeatureContext?
   private var coreController: CoreController?
   private var settingsController: SettingsController?
+  private var menuBarController: MenubarController?
   private var subscriptions = Set<AnyCancellable>()
+  private var loaded: Bool = false
 
   @Published var state: ApplicationState = .launching(LaunchView())
 
@@ -64,11 +72,8 @@ class Saloon: ViewKitStore {
       let viewKitContext = context.viewKitContext(keyInputSubjectWrapper: Self.keyInputSubject)
 
       self.context = viewKitContext
+      self.featureContext = context
       super.init(groups: groups, context: viewKitContext)
-
-      observeNotifications()
-      subscribe(context)
-
       self.state = .content(MainView(store: self, groupController: viewKitContext.groups))
     } catch let error {
       AppDelegateErrorController.handle(error)
@@ -77,18 +82,38 @@ class Saloon: ViewKitStore {
     }
   }
 
-  func load() {
-    self.settingsController = SettingsController(userDefaults: .standard)
+  func receive(_ scenePhase: ScenePhase) {
+    switch scenePhase {
+    case .active:
+      initialLoad()
+      if UserDefaults.standard.hideDockIcon {
+        NSApp.setActivationPolicy(.regular)
+      }
+    case .background:
+      if UserDefaults.standard.hideDockIcon {
+        NSApp.setActivationPolicy(.accessory)
+      }
+    case .inactive:
+      break
+    @unknown default:
+      assertionFailure("Unknown scene phase: \(scenePhase)")
+    }
   }
 
-  private func observeNotifications() {
-    NotificationCenter.default.addObserver(self, selector: #selector(enableHotKeys),
-                                           name: AppDelegate.enableNotification, object: nil)
-    NotificationCenter.default.addObserver(self, selector: #selector(disableHotKeys),
-                                           name: AppDelegate.disableNotification, object: nil)
+  // MARK: Private methods
+
+  private func initialLoad() {
+    guard let featureContext = featureContext,
+          !loaded else { return }
+
+    settingsController = SettingsController(userDefaults: .standard)
+    subscribe(to: featureContext)
+    subscribe(to: UserDefaults.standard, context: featureContext)
+    subscribe(to: NotificationCenter.default)
+    loaded = true
   }
 
-  private func subscribe(_ context: FeatureContext) {
+  private func subscribe(to context: FeatureContext) {
     context.groups.subject
       .receive(on: DispatchQueue.main)
       .sink { groups in
@@ -103,15 +128,16 @@ class Saloon: ViewKitStore {
         self.saveGroupsToDisk(groups)
       }
       .store(in: &subscriptions)
+  }
 
-    UserDefaults.standard.publisher(for: \.groupSelection).sink { newValue in
-      guard let newValue = newValue else {
-        return
-      }
+  private func subscribe(to userDefaults: UserDefaults,
+                         context: FeatureContext) {
+    userDefaults.publisher(for: \.groupSelection).sink { newValue in
+      guard let newValue = newValue else { return }
       self.selectedGroup = self.groups.first(where: { $0.id == newValue })
     }.store(in: &subscriptions)
 
-    UserDefaults.standard.publisher(for: \.workflowSelection).sink { newValue in
+    userDefaults.publisher(for: \.workflowSelection).sink { newValue in
       guard let newValue = newValue else {
         self.selectedWorkflow = nil
         return
@@ -121,6 +147,29 @@ class Saloon: ViewKitStore {
         context.workflow.perform(.set(workflow: selectedWorkflow))
       }
       self.selectedWorkflow = selectedWorkflow
+    }.store(in: &subscriptions)
+
+    userDefaults.publisher(for: \.hideMenuBarIcon).sink { newValue in
+      if newValue {
+        self.menuBarController = nil
+        return
+      }
+      self.menuBarController = MenubarController()
+      self.menuBarController?.delegate = self
+    }.store(in: &subscriptions)
+  }
+
+  private func subscribe(to notificationCenter: NotificationCenter) {
+    notificationCenter.publisher(for: Saloon.enableNotification).sink { _ in
+      if !launchArguments.isEnabled(.disableKeyboardShortcuts) {
+        self.coreController?.disableKeyboardShortcuts = false
+      }
+    }.store(in: &subscriptions)
+
+    notificationCenter.publisher(for: Saloon.disableNotification).sink { _ in
+      if !launchArguments.isEnabled(.disableKeyboardShortcuts) {
+        self.coreController?.disableKeyboardShortcuts = true
+      }
     }.store(in: &subscriptions)
   }
 
@@ -132,17 +181,9 @@ class Saloon: ViewKitStore {
     }
   }
 
-  // MARK: Notifications
-
-  @objc private func enableHotKeys() {
-    if !launchArguments.isEnabled(.disableKeyboardShortcuts) {
-      coreController?.disableKeyboardShortcuts = false
-    }
-  }
-
-  @objc private func disableHotKeys() {
-    if !launchArguments.isEnabled(.disableKeyboardShortcuts) {
-      coreController?.disableKeyboardShortcuts = true
-    }
+  // MARK: MenubarControllerDelegate
+  func menubarController(_ controller: MenubarController, didTapOpenApplication openApplicationMenuItem: NSMenuItem) {
+    receive(.active)
+    NSWorkspace.shared.open(Bundle.main.bundleURL)
   }
 }

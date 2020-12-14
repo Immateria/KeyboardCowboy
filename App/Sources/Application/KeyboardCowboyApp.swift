@@ -12,11 +12,7 @@ struct KeyboardCowboyApp: App {
     WindowGroup {
       store.state.currentView
         .frame(minWidth: 800, minHeight: 520)
-        .onChange(of: scenePhase, perform: { phase in
-          if phase == .active {
-            store.load()
-          }
-        })
+        .onChange(of: scenePhase, perform: store.receive(_:))
     }
     .windowToolbarStyle(UnifiedWindowToolbarStyle())
     .commands {

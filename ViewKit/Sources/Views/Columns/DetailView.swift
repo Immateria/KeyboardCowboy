@@ -25,27 +25,30 @@ struct DetailView: View {
   var body: some View {
     ScrollView {
       VStack {
-        VStack {
+        VStack(alignment: .leading) {
           WorkflowView(workflow) { config in
             workflow.name = config.name
             context.workflow.perform(.update(workflow))
           }
+          HeaderView(title: "Keyboard shortcuts:").padding([.top])
           KeyboardShortcutList(workflow: $workflow,
                                performAction: context.keyboardsShortcuts.perform(_:))
             .cornerRadius(8)
         }.padding()
       }
-      .padding([.leading, .trailing, .bottom])
+      .padding([.leading, .trailing, .bottom], 8)
       .background(Color(.textBackgroundColor))
 
-      VStack {
+      VStack(alignment: .leading) {
+        HeaderView(title: "Commands:")
+                .padding([.leading, .top])
         CommandListView(selection: $selectedCommand,
                         workflow: $workflow,
                         perform: context.commands.perform(_:),
                         receive: { sheet = $0 })
           .onReceive(context.keyInputSubjectWrapper, perform: receive(_:))
       }
-      .padding()
+      .padding(8)
       .onDrop($isDropping) { urls in
         context.commands.perform(.drop(urls, workflow))
       }.overlay(
