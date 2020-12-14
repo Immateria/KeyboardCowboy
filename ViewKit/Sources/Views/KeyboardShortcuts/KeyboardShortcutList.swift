@@ -91,7 +91,7 @@ struct KeyboardShortcutList_Previews: PreviewProvider, TestPreviewProvider {
   }
 
   static var testPreview: some View {
-    KeyboardShortcutList(workflow: .constant(ModelFactory().workflowDetail()))
-      { _ in }
+    KeyboardShortcutList(workflow: .constant(ModelFactory().workflowDetail()),
+                         performAction: { _ in })
   }
 }

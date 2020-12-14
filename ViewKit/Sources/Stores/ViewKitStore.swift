@@ -6,10 +6,10 @@ open class ViewKitStore: ObservableObject {
   public var selectedGroup: ModelKit.Group?
   public var selectedWorkflow: Workflow?
   public static let keyInputSubject = KeyInputSubjectWrapper()
-  var context: ViewKitFeatureContext
+  public var context: ViewKitFeatureContext!
 
   public init(groups: [ModelKit.Group] = [],
-              context: ViewKitFeatureContext) {
+              context: ViewKitFeatureContext?) {
     self.groups = groups
     self.context = context
   }

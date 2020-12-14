@@ -20,9 +20,7 @@ public struct CommandListView: View {
   }
 
   @Environment(\.colorScheme) var colorScheme
-
   @Binding var selection: Command?
-
   @Binding var workflow: Workflow
   let perform: (Action) -> Void
   let receive: (Sheet) -> Void
@@ -98,9 +96,8 @@ extension CommandListView {
           .shadow(color: Color(.shadowColor).opacity(0.05), radius: 10, x: 0, y: 12.5)
           .animation(.none)
           .contextMenu {
-            Button("Edit") { receive(.edit(command)) }
-            Divider()
-            Button("Delete") { perform(.delete(command, in: workflow)) }
+            CommandListContextMenu(editAction: { receive(.edit(command)) },
+                                   deleteAction: { perform(.delete(command, in: workflow)) })
           }
         })
     }

@@ -4,7 +4,6 @@ import ModelKit
 
 @main
 struct KeyboardCowboyApp: App {
-
   @StateObject private var store = Saloon()
   @Environment(\.scenePhase) var scenePhase
 

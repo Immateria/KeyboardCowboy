@@ -1,10 +1,6 @@
 import SwiftUI
 import ModelKit
 
-struct EditGroupConfig {
-  
-}
-
 // swiftlint:disable line_length
 struct EditGroup: View {
   @State private var showColorPopover = false

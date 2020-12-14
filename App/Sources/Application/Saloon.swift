@@ -43,10 +43,8 @@ class Saloon: ViewKitStore, MenubarControllerDelegate {
 
   private let storageController: StorageControlling
 
-  private(set) var context: ViewKitFeatureContext
-
   private var featureContext: FeatureContext?
-  private var coreController: CoreController?
+  private var coreController: CoreControlling?
   private var settingsController: SettingsController?
   private var menuBarController: MenubarController?
   private var subscriptions = Set<AnyCancellable>()
@@ -59,7 +57,6 @@ class Saloon: ViewKitStore, MenubarControllerDelegate {
     self.storageController = Self.factory.storageController(
       path: configuration.path,
       fileName: configuration.fileName)
-
     do {
       let groups = try storageController.load()
       let groupsController = Self.factory.groupsController(groups: groups)
@@ -67,19 +64,31 @@ class Saloon: ViewKitStore, MenubarControllerDelegate {
         disableKeyboardShortcuts: launchArguments.isEnabled(.disableKeyboardShortcuts),
         groupsController: groupsController)
 
+      self.coreController = coreController
+
       let context = FeatureFactory(coreController: coreController).featureContext(
         keyInputSubjectWrapper: Self.keyInputSubject)
       let viewKitContext = context.viewKitContext(keyInputSubjectWrapper: Self.keyInputSubject)
 
+      super.init(groups: groups, context: viewKitContext)
+
+      self.subscribe(to: context)
       self.context = viewKitContext
       self.featureContext = context
-      super.init(groups: groups, context: viewKitContext)
       self.state = .content(MainView(store: self, groupController: viewKitContext.groups))
     } catch let error {
       AppDelegateErrorController.handle(error)
-      self.context = ViewKitFeatureContext.preview()
-      super.init(groups: [], context: context)
+      super.init(groups: [], context: nil)
     }
+  }
+
+  public func initialLoad() {
+    guard !loaded else { return }
+
+    settingsController = SettingsController(userDefaults: .standard)
+    subscribe(to: UserDefaults.standard, context: context)
+    subscribe(to: NotificationCenter.default)
+    loaded = true
   }
 
   func receive(_ scenePhase: ScenePhase) {
@@ -102,17 +111,6 @@ class Saloon: ViewKitStore, MenubarControllerDelegate {
 
   // MARK: Private methods
 
-  private func initialLoad() {
-    guard let featureContext = featureContext,
-          !loaded else { return }
-
-    settingsController = SettingsController(userDefaults: .standard)
-    subscribe(to: featureContext)
-    subscribe(to: UserDefaults.standard, context: featureContext)
-    subscribe(to: NotificationCenter.default)
-    loaded = true
-  }
-
   private func subscribe(to context: FeatureContext) {
     context.groups.subject
       .receive(on: DispatchQueue.main)
@@ -131,7 +129,7 @@ class Saloon: ViewKitStore, MenubarControllerDelegate {
   }
 
   private func subscribe(to userDefaults: UserDefaults,
-                         context: FeatureContext) {
+                         context: ViewKitFeatureContext) {
     userDefaults.publisher(for: \.groupSelection).sink { newValue in
       guard let newValue = newValue else { return }
       self.selectedGroup = self.groups.first(where: { $0.id == newValue })

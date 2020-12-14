@@ -36,13 +36,13 @@ final class CommandsFeatureController: ActionController {
   func perform(_ action: CommandListView.Action) {
     switch action {
     case .create(let command, let workflow):
-      createCommand(command, in: workflow)
+      create(command, in: workflow)
     case .delete(let command, let workflow):
-      deleteCommand(command, in: workflow)
+      delete(command, in: workflow)
     case .edit(let command, let workflow):
-      updateCommand(command, in: workflow)
+      update(command, in: workflow)
     case .move(let command, let offset, let workflow):
-      moveCommand(command, to: offset, in: workflow)
+      move(command, to: offset, in: workflow)
     case .reveal(let command):
       reveal(command)
     case .run(let command):
@@ -83,19 +83,19 @@ final class CommandsFeatureController: ActionController {
     commandController.run([command])
   }
 
-  private func createCommand(_ command: Command, in workflow: Workflow) {
+  private func create(_ command: Command, in workflow: Workflow) {
     var workflow = workflow
     workflow.commands.append(command)
     delegate?.commandsFeatureController(self, didCreateCommand: command, in: workflow)
   }
 
-  private func updateCommand(_ command: Command, in workflow: Workflow) {
+  private func update(_ command: Command, in workflow: Workflow) {
     var workflow = workflow
     try? workflow.commands.replace(command)
     delegate?.commandsFeatureController(self, didCreateCommand: command, in: workflow)
   }
 
-  private func moveCommand(_ command: Command, to offset: Int, in workflow: Workflow) {
+  private func move(_ command: Command, to offset: Int, in workflow: Workflow) {
     guard let currentIndex = workflow.commands.firstIndex(of: command) else { return }
 
     let newIndex = currentIndex + offset
@@ -104,7 +104,7 @@ final class CommandsFeatureController: ActionController {
     delegate?.commandsFeatureController(self, didUpdateCommand: command, in: workflow)
   }
 
-  private func deleteCommand(_ command: Command, in workflow: Workflow) {
+  private func delete(_ command: Command, in workflow: Workflow) {
     var workflow = workflow
     try? workflow.commands.remove(command)
     delegate?.commandsFeatureController(self, didDeleteCommand: command, in: workflow)

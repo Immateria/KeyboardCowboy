@@ -27,11 +27,11 @@ final class GroupsFeatureController: ActionController,
   func perform(_ action: GroupList.Action) {
     switch action {
     case .createGroup:
-      newGroup()
+      create()
     case .deleteGroup(let group):
       delete(group)
     case .updateGroup(let group):
-      save(group)
+      update(group)
     case .dropFile(let urls):
       for url in urls {
         processUrl(url)
@@ -48,7 +48,7 @@ final class GroupsFeatureController: ActionController,
     subject.send(groups)
   }
 
-  private func newGroup() {
+  private func create() {
     let group = ModelKit.Group.empty()
     var groups = groupsController.groups
     groups.append(group)
@@ -83,7 +83,7 @@ final class GroupsFeatureController: ActionController,
     reload(groups)
   }
 
-  private func save(_ group: ModelKit.Group) {
+  private func update(_ group: ModelKit.Group) {
     var groups = groupsController.groups
     try? groups.replace(group)
     reload(groups)
