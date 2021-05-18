@@ -85,18 +85,8 @@ final class ApplicationCommandController: ApplicationCommandControlling {
       return
     }
 
-    if command.modifiers.contains(.background) {
-      plugins.launchApplication.execute(command) { error in
-        if let error = error {
-          promise(.failure(error))
-        } else {
-          promise(.success(()))
-        }
-      }
-      return
-    }
-
-    if command.application.metadata.isElectron {
+    if command.modifiers.contains(.background) ||
+        command.application.metadata.isElectron {
       plugins.launchApplication.execute(command) { error in
         if let error = error {
           promise(.failure(error))
