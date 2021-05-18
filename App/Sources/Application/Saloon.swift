@@ -178,9 +178,9 @@ class Saloon: ViewKitStore, MenubarControllerDelegate {
 
     coreController?.publisher.sink(receiveValue: { newValue in
       self.hudFeatureController.state = newValue
+      windowController.showWindow(nil)
     }).store(in: &subscriptions)
 
-    windowController.showWindow(nil)
     window.setFrameOrigin(.zero)
 
     self.keyboardShortcutWindowController = windowController
