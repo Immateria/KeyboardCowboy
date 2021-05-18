@@ -144,15 +144,7 @@ class Saloon: ViewKitStore, MenubarControllerDelegate {
       createQuickRun()
       state = .launched
 
-      /*
-       Fix *** Assertion failure in +[NSToolbarView newViewForToolbar:inWindow:attachedToEdge:], NSToolbarView.m:282
-       */
-      NSApplication.shared.windows.forEach { window in
-        if window.frame.origin.x.isNaN || window.frame.origin.y.isNaN {
-          window.setFrameOrigin(.zero)
-        }
-      }
-
+      MacOSWorkarounds.avoidNaNOrigins()
       NotificationCenter.default
         .publisher(for: .init(ApplicationCommandNotification.keyboardCowboyWasActivate.rawValue))
         .sink { _ in

@@ -13,18 +13,42 @@ class MacOSWorkarounds {
     do {
       guard let klass = NSClassFromString("NSTouchBarLayout") else { return }
       _ = try Interpose(klass) { builder in
-        try builder.hook("setLeadingWidgetWidth:",
-                         methodSignature: (@convention(c) (AnyObject, Selector, CGFloat) -> Void).self,
-                         hookSignature: (@convention(block) (AnyObject, CGFloat) -> Void).self) { store in { innerSelf, width in
-          var newWidth = width
-          if width < 0 {
-            logger.warning("Applying workaround for NSTouchBarLayout crash.")
-            newWidth = 0
+        try builder.hook(
+          "setLeadingWidgetWidth:",
+          methodSignature: (@convention(c) (AnyObject, Selector, CGFloat) -> Void).self,
+          hookSignature: (@convention(block) (AnyObject, CGFloat) -> Void).self) {
+          store in {
+            innerSelf, width in
+            var newWidth = width
+            if width < 0 {
+              logger.warning("Applying workaround for NSTouchBarLayout crash.")
+              newWidth = 0
+            }
+            store.original(innerSelf, store.selector, newWidth)
           }
-          store.original(innerSelf, store.selector, newWidth)
-        }}}
+        }
+      }
     } catch {
       logger.error("Failed to install workaround for touch bar crash: \(String(describing: error)).")
     }
   }()
+
+  /// Check all available windows for `NaN` values on the windows origins
+  ///  Fixes *** Assertion failure in +[NSToolbarView newViewForToolbar:inWindow:attachedToEdge:], NSToolbarView.m:282
+  static func avoidNaNOrigins() {
+    NSApplication.shared.windows.forEach { window in
+      if window.frame.origin.x.isNaN || window.frame.origin.y.isNaN {
+        let origin: CGPoint
+
+        if let mainScreen = NSScreen.main {
+          origin = CGPoint(x: mainScreen.frame.size.width / 4,
+                           y: mainScreen.frame.size.height / 4)
+        } else {
+          origin = .zero
+        }
+
+        window.setFrameOrigin(origin)
+      }
+    }
+  }
 }
