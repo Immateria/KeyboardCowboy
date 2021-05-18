@@ -16,9 +16,7 @@ class MacOSWorkarounds {
         try builder.hook(
           "setLeadingWidgetWidth:",
           methodSignature: (@convention(c) (AnyObject, Selector, CGFloat) -> Void).self,
-          hookSignature: (@convention(block) (AnyObject, CGFloat) -> Void).self) {
-          store in {
-            innerSelf, width in
+          hookSignature: (@convention(block) (AnyObject, CGFloat) -> Void).self) { store in { innerSelf, width in
             var newWidth = width
             if width < 0 {
               logger.warning("Applying workaround for NSTouchBarLayout crash.")
