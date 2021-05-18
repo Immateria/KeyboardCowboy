@@ -64,7 +64,7 @@ class Saloon: ViewKitStore, MenubarControllerDelegate {
 
     do {
       var groups = try storageController.load()
-      groups = pathFinderController.patch(groups, applications: installedApplications)
+      pathFinderController.patch(&groups, applications: installedApplications)
       let groupsController = Self.factory.groupsController(groups: groups)
       let hotKeyController = try Self.factory.hotkeyController()
 
@@ -94,25 +94,8 @@ class Saloon: ViewKitStore, MenubarControllerDelegate {
       self.subscribe(to: NSApplication.shared)
       self.subscribe(to: NSWorkspace.shared)
     } catch let error {
-      let permissionController = Self.factory.permissionsController()
-      if !permissionController.hasPrivileges() {
-        let applicationName = ProcessInfo.processInfo.processName
-        let text = """
-    \(applicationName) requires access to accessibility.
-
-    To enable this, click on \"Open System Preferences\" on the dialog that just appeared.
-
-    When the setting is enabled, restart \(applicationName) and you should be ready to go.
-
-    If you have already granted permission, try and disable and enable the current
-    entry inside the list of applications under "Allow the apps below to control your computer."
-    """
-        view = .needsPermission(PermissionsView(text: text))
-      } else {
-        ErrorController.handle(error)
-      }
-
       super.init(groups: [], context: .preview())
+      self.handle(error)
     }
   }
 
@@ -125,6 +108,26 @@ class Saloon: ViewKitStore, MenubarControllerDelegate {
   }
 
   // MARK: Private methods
+
+  private func handle(_ error: Error) {
+    let permissionController = Self.factory.permissionsController()
+    if !permissionController.hasPrivileges() {
+      let applicationName = ProcessInfo.processInfo.processName
+      let text = """
+  \(applicationName) requires access to accessibility.
+
+  To enable this, click on \"Open System Preferences\" on the dialog that just appeared.
+
+  When the setting is enabled, restart \(applicationName) and you should be ready to go.
+
+  If you have already granted permission, try and disable and enable the current
+  entry inside the list of applications under "Allow the apps below to control your computer."
+  """
+      view = .needsPermission(PermissionsView(text: text))
+    } else {
+      ErrorController.handle(error)
+    }
+  }
 
   private func set(_ newState: ApplicationState) {
     switch newState {
@@ -140,6 +143,22 @@ class Saloon: ViewKitStore, MenubarControllerDelegate {
       createKeyboardShortcutWindow()
       createQuickRun()
       state = .launched
+
+      /*
+       Fix *** Assertion failure in +[NSToolbarView newViewForToolbar:inWindow:attachedToEdge:], NSToolbarView.m:282
+       */
+      NSApplication.shared.windows.forEach { window in
+        if window.frame.origin.x.isNaN || window.frame.origin.y.isNaN {
+          window.setFrameOrigin(.zero)
+        }
+      }
+
+      NotificationCenter.default
+        .publisher(for: .init(ApplicationCommandNotification.keyboardCowboyWasActivate.rawValue))
+        .sink { _ in
+          self.openMainWindow()
+        }
+        .store(in: &subscriptions)
     }
   }
 
@@ -177,10 +196,9 @@ class Saloon: ViewKitStore, MenubarControllerDelegate {
 
   private func subscribe(to application: NSApplication) {
     application.publisher(for: \.isRunning)
-      .sink { [weak self] value in
-        guard value == true else { return }
+      .filter { $0 == true }
+      .sink { [weak self] _ in
         self?.set(.launching)
-
         if UserDefaults.standard.openWindowOnLaunch ||
             launchArguments.isEnabled(.openWindowAtLaunch) {
           self?.openMainWindow()
@@ -190,21 +208,17 @@ class Saloon: ViewKitStore, MenubarControllerDelegate {
       }.store(in: &subscriptions)
 
     application.publisher(for: \.mainWindow)
-      .sink { [weak self] mainWindow in
-        guard let mainWindow = mainWindow else { return }
-        self?.mainWindow = mainWindow
+      .compactMap { $0 }
+      .sink { [weak self] in
+        self?.mainWindow = $0
       }.store(in: &subscriptions)
   }
 
   private func subscribe(to workspace: NSWorkspace) {
     workspace
       .publisher(for: \.frontmostApplication)
-      .sink { [weak self] runningApplication in
-        guard let self = self,
-              runningApplication?.bundleIdentifier != bundleIdentifier else {
-          return
-        }
-
+      .filter { $0?.bundleIdentifier != bundleIdentifier }
+      .sink { _ in
         if !launchArguments.isEnabled(.openWindowAtLaunch) {
           if UserDefaults.standard.hideDockIcon && self.mainWindow == nil {
             NSApp.setActivationPolicy(.accessory)
@@ -240,8 +254,9 @@ class Saloon: ViewKitStore, MenubarControllerDelegate {
 
   private func subscribe(to userDefaults: UserDefaults,
                          context: ViewKitFeatureContext) {
-    userDefaults.publisher(for: \.groupSelection).sink { newValue in
-      guard let newValue = newValue else { return }
+    userDefaults.publisher(for: \.groupSelection)
+      .compactMap({ $0 })
+      .sink { newValue in
       if let newGroup = self.groups.first(where: { $0.id == newValue }) {
         self.selectedGroup = newGroup
         context.workflows.perform(.set(group: newGroup))

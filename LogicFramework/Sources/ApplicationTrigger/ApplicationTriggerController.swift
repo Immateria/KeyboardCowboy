@@ -34,20 +34,13 @@ public class ApplicationTriggerController: ApplicationTriggerControlling {
 
     workspace
       .publisher(for: \.runningApplications)
-      .sink { runningsApplications in
-        let bundleIdentifiers = runningsApplications.compactMap({ $0.bundleIdentifier })
-        self.process(bundleIdentifiers)
-      }
+      .map { $0.compactMap { $0.bundleIdentifier } }
+      .sink(receiveValue: process(_:))
       .store(in: &subscriptions)
 
     workspace.publisher(for: \.frontmostApplication)
-      .sink { runningApplication in
-        guard let runningApplication = runningApplication else {
-          return
-        }
-
-        self.process(runningApplication)
-      }
+      .compactMap({ $0 })
+      .sink(receiveValue: process(_:))
       .store(in: &subscriptions)
   }
 

@@ -22,43 +22,36 @@ public enum OpenCommandControllingError: Error {
 }
 
 final class OpenCommandController: OpenCommandControlling {
-  let workspace: WorkspaceProviding
+  struct Plugins {
+    let finderFolder: OpenFolderInFinder
+    let parser = OpenURLParser()
+    let open: OpenFilePlugin
+  }
+
+  let plugins: Plugins
 
   init(workspace: WorkspaceProviding) {
-    self.workspace = workspace
+    self.plugins = Plugins(
+      finderFolder: OpenFolderInFinder(workspace: workspace),
+      open: OpenFilePlugin(workspace: workspace)
+    )
   }
 
   func run(_ command: OpenCommand) -> CommandPublisher {
-    Future { [weak self] promise in
-      let path = command.path.sanitizedPath
-      let targetUrl: URL
-
-      if let url = URL(string: path) {
-        if url.scheme == nil || url.isFileURL {
-          targetUrl = URL(fileURLWithPath: path)
-        } else {
-          targetUrl = url
-        }
-      } else {
-        targetUrl = URL(fileURLWithPath: path)
-      }
-
-      let config = NSWorkspace.OpenConfiguration()
-
-      func complete(application: RunningApplication?, error: Error?) {
-        if error != nil {
-          promise(.failure(OpenCommandControllingError.failedToOpenUrl))
-        } else {
+    Future { promise in
+      let url = self.plugins.parser.parse(command.path.sanitizedPath)
+      if self.plugins.finderFolder.validate(command) {
+        self.plugins.finderFolder.execute(command, url: url) {
           promise(.success(()))
         }
-      }
-
-      if let application = command.application {
-        let applicationUrl = URL(fileURLWithPath: application.path)
-        self?.workspace.open([targetUrl], withApplicationAt: applicationUrl, config: config,
-                             completionHandler: complete)
       } else {
-        self?.workspace.open(targetUrl, config: config, completionHandler: complete)
+        self.plugins.open.execute(command, url: url) { error in
+          if error != nil {
+            promise(.failure(OpenCommandControllingError.failedToOpenUrl))
+          } else {
+            promise(.success(()))
+          }
+        }
       }
     }.eraseToAnyPublisher()
   }

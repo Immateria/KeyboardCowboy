@@ -5,14 +5,14 @@ import ModelKit
 public class PathFinderController {
   public init() {}
 
-  public func patch(_ groups: [Group], applications: [Application]) -> [Group] {
+  public func patch(_ groups: inout [Group], applications: [Application]) {
     var appDictionary = [String: Application]()
     for app in applications {
       appDictionary[app.bundleIdentifier] = app
     }
 
-    var groups = groups
-    for (gOffset, group) in groups.enumerated() {
+    var mutatedGroups = groups
+    for (gOffset, group) in mutatedGroups.enumerated() {
       for (wOffset, workflow) in group.workflows.enumerated() {
         for (cOffset, command) in workflow.commands.enumerated() {
 
@@ -34,12 +34,11 @@ public class PathFinderController {
               modifiers: appCommand.modifiers
             ))
 
-            groups[gOffset].workflows[wOffset].commands[cOffset] = newCommand
+            mutatedGroups[gOffset].workflows[wOffset].commands[cOffset] = newCommand
           }
         }
       }
     }
-
-    return groups
+    groups = mutatedGroups
   }
 }

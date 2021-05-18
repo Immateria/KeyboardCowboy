@@ -21,13 +21,29 @@ public enum ApplicationCommandControllingError: Error {
   case failedToClose
 }
 
+public enum ApplicationCommandNotification: String {
+  case keyboardCowboyWasActivate
+}
+
 final class ApplicationCommandController: ApplicationCommandControlling {
+  struct Plugins {
+    let activateApplication: ActivateApplicationPlugin
+    let closeApplication: CloseApplicationPlugin
+    let launchApplication: LaunchApplicationPlugin
+  }
+
+  let plugins: Plugins
   let windowListProvider: WindowListProviding
   let workspace: WorkspaceProviding
 
   init(windowListProvider: WindowListProviding, workspace: WorkspaceProviding) {
     self.windowListProvider = windowListProvider
     self.workspace = workspace
+    self.plugins = Plugins(
+      activateApplication: ActivateApplicationPlugin(workspace: workspace),
+      closeApplication: CloseApplicationPlugin(workspace: workspace),
+      launchApplication: LaunchApplicationPlugin(workspace: workspace)
+    )
   }
 
   // MARK: Public methods
@@ -48,7 +64,11 @@ final class ApplicationCommandController: ApplicationCommandControlling {
       case .open:
         self.openApplication(command: command, promise: promise)
       case .close:
-        self.closeApplication(command: command, promise: promise)
+        if self.plugins.closeApplication.execute(command) {
+          promise(.success(()))
+        } else {
+          promise(.failure(ApplicationCommandControllingError.failedToClose))
+        }
       }
 
     }.eraseToAnyPublisher()
@@ -56,49 +76,58 @@ final class ApplicationCommandController: ApplicationCommandControlling {
 
   private func openApplication(command: ApplicationCommand,
                                promise: @escaping (Result<Void, Error>) -> Void) {
+
+    if command.application.bundleIdentifier == Bundle.main.bundleIdentifier {
+      DispatchQueue.main.async {
+        NotificationCenter.default.post(.keyboardCowboyWasActivate)
+        promise(.success(()))
+      }
+      return
+    }
+
     if command.modifiers.contains(.background) {
-      launchApplication(command, completion: { error in
+      plugins.launchApplication.execute(command) { error in
         if let error = error {
           promise(.failure(error))
         } else {
           promise(.success(()))
         }
-      })
+      }
       return
     }
 
     if command.application.metadata.isElectron {
-      launchApplication(command, completion: { error in
+      plugins.launchApplication.execute(command) { error in
         if let error = error {
           promise(.failure(error))
         } else {
           promise(.success(()))
         }
-      })
+      }
       return
     }
 
     let isFrontMostApplication = command.application
       .bundleIdentifier == workspace.frontApplication?.bundleIdentifier
 
-    if isFrontMostApplication, activateApplication(command) != nil {
+    if isFrontMostApplication, plugins.activateApplication.execute(command) != nil {
       if !windowListProvider.windowOwners().contains(command.application.bundleName) {
-        launchApplication(command, completion: { error in
+        plugins.launchApplication.execute(command) { error in
           if error != nil {
             promise(.failure(ApplicationCommandControllingError.failedToActivate))
           } else {
             promise(.success(()))
           }
-        })
+        }
       } else {
         promise(.success(()))
       }
     } else {
-      launchApplication(command) { error in
+      plugins.launchApplication.execute(command) { error in
         if error != nil {
           promise(.failure(ApplicationCommandControllingError.failedToLaunch))
         } else if !self.windowListProvider.windowOwners().contains(command.application.bundleName) {
-          if let error = self.activateApplication(command) {
+          if let error = self.plugins.activateApplication.execute(command) {
             promise(.failure(error))
           } else {
             promise(.success(()))
@@ -109,71 +138,10 @@ final class ApplicationCommandController: ApplicationCommandControlling {
       }
     }
   }
+}
 
-  private func closeApplication(command: ApplicationCommand,
-                                promise: @escaping (Result<Void, Error>) -> Void) {
-    guard let runningApplication = NSWorkspace.shared.runningApplications.first(where: {
-      command.application.bundleIdentifier == $0.bundleIdentifier
-    }) else {
-      promise(.failure(ApplicationCommandControllingError.failedToClose))
-      return
-    }
-
-    if !runningApplication.terminate() {
-      promise(.failure(ApplicationCommandControllingError.failedToClose))
-    }
-  }
-
-  /// Launch an application using the applications bundle identifier
-  /// Applications are launched using `NSWorkspace`
-  ///
-  /// - Parameter command: An application command which is used to resolve the applications
-  ///                      bundle identifier.
-  /// - Throws: If `NSWorkspace.launchApplication` returns `false`, the method will throw
-  ///           `ApplicationCommandControllingError.failedToLaunch`
-  private func launchApplication(_ command: ApplicationCommand, completion: @escaping (Error?) -> Void) {
-    let config = NSWorkspace.OpenConfiguration()
-
-    config.activates = !command.modifiers.contains(.background)
-    config.hides = command.modifiers.contains(.hidden)
-
-    workspace.open(URL(fileURLWithPath: command.application.path), config: config) { _, error in
-      completion(error)
-    }
-  }
-
-  /// Activate an application using its bundle identifier.
-  ///
-  /// Activation is done by filtering an match inside `NSWorkspace`'s `.runningApplications`.
-  /// The first element that matches the bundle identifier will be used to activate the
-  /// application by simply calling `activate` on the `NSRunningApplication`.
-  /// `activate` is called with the options `.activateIgnoringOtherApps`
-  ///
-  /// - Parameter command: An application command which is used to resolve the applications
-  ///                      bundle identifier.
-  /// - Throws: If the method cannot match a running application then
-  ///           a `.failedToFindRunningApplication` will be thrown.
-  ///           If `.activate` should fail, then another error will be thrown: `.failedToActivate`
-  private func activateApplication(_ command: ApplicationCommand) -> Error? {
-    guard
-      let runningApplication = workspace
-        .applications
-        .first(where:
-                { $0.bundleIdentifier?.lowercased() == command.application.bundleIdentifier.lowercased() }
-        ) else {
-      return ApplicationCommandControllingError.failedToFindRunningApplication
-    }
-
-    var options: NSApplication.ActivationOptions = .activateIgnoringOtherApps
-
-    if workspace.frontApplication?.bundleIdentifier?.lowercased() == command.application.bundleIdentifier.lowercased() {
-      options.insert(.activateAllWindows)
-    }
-
-    if !runningApplication.activate(options: options) {
-      return ApplicationCommandControllingError.failedToActivate
-    } else {
-      return nil
-    }
+private extension NotificationCenter {
+  func post(_ notification: ApplicationCommandNotification) {
+    self.post(.init(name: .init(rawValue: notification.rawValue)))
   }
 }
