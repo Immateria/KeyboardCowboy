@@ -26,6 +26,7 @@ final class OpenCommandController: OpenCommandControlling {
     let finderFolder: OpenFolderInFinder
     let parser = OpenURLParser()
     let open: OpenFilePlugin
+    let swapTab = OpenURLSwapTabsPlugin()
   }
 
   let plugins: Plugins
@@ -45,6 +46,11 @@ final class OpenCommandController: OpenCommandControlling {
           promise(.success(()))
         }
       } else {
+        guard self.plugins.swapTab.execute(command) == false else {
+          promise(.success(()))
+          return
+        }
+
         self.plugins.open.execute(command, url: url) { error in
           if error != nil {
             promise(.failure(OpenCommandControllingError.failedToOpenUrl))
