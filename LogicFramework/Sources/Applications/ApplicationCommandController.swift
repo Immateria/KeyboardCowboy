@@ -112,8 +112,12 @@ final class ApplicationCommandController: ApplicationCommandControlling {
           }
         }
       } else {
-        plugins.bringToFront.execute(command) { _ in
-          promise(.success(()))
+        plugins.bringToFront.execute(command) { error in
+          if let error = error {
+            promise(.failure(error))
+          } else {
+            promise(.success(()))
+          }
         }
       }
     } else {

@@ -5,20 +5,33 @@ import ModelKit
 /// This is only here because sending `.activateAllWindows` to `NSRunningApplication.activate()`
 /// currently does not work as expected.
 final class BringToFrontApplicationPlugin {
-  func execute(_ command: ApplicationCommand, then handler: @escaping (Error?) -> Void) {
-    // swiftlint:disable line_length
-    let source = """
-      tell application "System Events"
-      tell application "\(command.application.bundleName)"
-          activate
-        end tell
-        click menu item "Bring All to Front" of menu "Window" of menu bar 1 of application process "\(command.application.bundleName)"
-      end tell
-      """
+  enum BringToFrontApplicationPluginError: Error {
+    case failedToCreate
+    case failedToCompile
+    case failedToRun
+  }
 
-    let script = NSAppleScript(source: source)
+  private var cache: NSAppleScript?
+
+  func execute(_ command: ApplicationCommand, then handler: @escaping (Error?) -> Void) {
+    guard let script: NSAppleScript = cache ?? createAppleScript(command) else {
+      handler(BringToFrontApplicationPluginError.failedToCreate)
+      return
+    }
+
     var dictionary: NSDictionary?
-    script?.executeAndReturnError(&dictionary)
+
+    if !script.isCompiled && self.cache == nil {
+      script.compileAndReturnError(&dictionary)
+      if dictionary != nil {
+        handler(BringToFrontApplicationPluginError.failedToCompile)
+        return
+      }
+
+      self.cache = script
+    }
+
+    script.executeAndReturnError(&dictionary)
 
     if let dictionary = dictionary,
        let error = createError(from: dictionary) {
@@ -26,6 +39,16 @@ final class BringToFrontApplicationPlugin {
     } else {
       handler(nil)
     }
+  }
+
+  private func createAppleScript(_ command: ApplicationCommand) -> NSAppleScript? {
+    let source = """
+      tell application "System Events"
+        set frontmostProcess to first process where it is frontmost
+        click (menu item "Bring All to Front" of menu "Window" of menu bar 1 of frontmostProcess)
+      end tell
+      """
+    return NSAppleScript(source: source)
   }
 
   private func createError(from dictionary: NSDictionary) -> Error? {
