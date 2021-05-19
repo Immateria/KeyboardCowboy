@@ -76,14 +76,16 @@ public final class CoreController: NSObject, CoreControlling,
 
     NSWorkspace.shared
       .publisher(for: \.frontmostApplication)
+      .dropFirst()
       .removeDuplicates()
       .filter({ $0?.bundleIdentifier != bundleIdentifier })
       .filter({ $0?.bundleIdentifier != self.previousApplicationBundleIdentifier })
-      .sink(receiveValue: { [weak self] application in
+      .sink(receiveValue: { application in
         if let bundleIdentifier = application?.bundleIdentifier {
-          self?.previousApplicationBundleIdentifier = bundleIdentifier
+          self.previousApplicationBundleIdentifier = bundleIdentifier
         }
-        self?.reloadContext()
+        self.cancelReloadContext()
+        self.perform(#selector(self.reloadContext))
       }).store(in: &subscriptions)
 
     self.state = initialState
@@ -104,11 +106,6 @@ public final class CoreController: NSObject, CoreControlling,
   }
 
   @objc public func reloadContext() {
-    NSObject.cancelPreviousPerformRequests(
-      withTarget: self,
-      selector: #selector(reloadContext),
-      object: nil)
-
     Debug.print("🪀 Reloading context")
     var contextRule = Rule()
 
@@ -134,6 +131,7 @@ public final class CoreController: NSObject, CoreControlling,
   }
 
   public func respond(to keyboardShortcut: KeyboardShortcut) -> [Workflow] {
+    cancelReloadContext()
     perform(#selector(reloadContext), with: nil, afterDelay: resetInterval)
 
     currentKeyboardShortcuts.append(keyboardShortcut)
@@ -176,7 +174,12 @@ public final class CoreController: NSObject, CoreControlling,
         currentKeyboardSequence.append(KeyboardShortcut(key: "\(workflows.count) workflows"))
       }
 
-      reloadContext()
+      if currentCount > 1 {
+        cancelReloadContext()
+        reloadContext()
+      } else {
+        resetKeyboardSequence()
+      }
     } else {
       let workflowNames = workflowsToActivate.compactMap({ $0.name })
       Debug.print("🪃 Activating: \(workflowNames.joined(separator: ", ").replacingOccurrences(of: "Open ", with: ""))")
@@ -233,8 +236,16 @@ public final class CoreController: NSObject, CoreControlling,
     }
   }
 
+  private func cancelReloadContext() {
+    NSObject.cancelPreviousPerformRequests(
+      withTarget: self,
+      selector: #selector(reloadContext),
+      object: nil)
+  }
+
   @objc private func resetKeyboardSequence() {
     currentKeyboardSequence = []
+    currentKeyboardShortcuts = []
   }
 
   private func record(_ context: HotKeyContext) {
@@ -274,13 +285,12 @@ public final class CoreController: NSObject, CoreControlling,
   }
 
   public func commandController(_ controller: CommandController, didFinishRunning commands: [Command]) {
-    reloadContext()
     Debug.print("✅ Finished running: \(commands)")
   }
 
   // MARK: GroupsControllingDelegate
 
   public func groupsController(_ controller: GroupsControlling, didReloadGroups groups: [Group]) {
-    reloadContext()
+    perform(#selector(reloadContext))
   }
 }

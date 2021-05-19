@@ -27,9 +27,10 @@ public enum ApplicationCommandNotification: String {
 
 final class ApplicationCommandController: ApplicationCommandControlling {
   struct Plugins {
-    let activateApplication: ActivateApplicationPlugin
-    let closeApplication: CloseApplicationPlugin
-    let launchApplication: LaunchApplicationPlugin
+    let activate: ActivateApplicationPlugin
+    let bringToFront = BringToFrontApplicationPlugin()
+    let close: CloseApplicationPlugin
+    let launch: LaunchApplicationPlugin
   }
 
   let plugins: Plugins
@@ -40,9 +41,9 @@ final class ApplicationCommandController: ApplicationCommandControlling {
     self.windowListProvider = windowListProvider
     self.workspace = workspace
     self.plugins = Plugins(
-      activateApplication: ActivateApplicationPlugin(workspace: workspace),
-      closeApplication: CloseApplicationPlugin(workspace: workspace),
-      launchApplication: LaunchApplicationPlugin(workspace: workspace)
+      activate: ActivateApplicationPlugin(workspace: workspace),
+      close: CloseApplicationPlugin(workspace: workspace),
+      launch: LaunchApplicationPlugin(workspace: workspace)
     )
   }
 
@@ -64,7 +65,7 @@ final class ApplicationCommandController: ApplicationCommandControlling {
       case .open:
         self.openApplication(command: command, promise: promise)
       case .close:
-        if self.plugins.closeApplication.execute(command) {
+        if self.plugins.close.execute(command) {
           promise(.success(()))
         } else {
           promise(.failure(ApplicationCommandControllingError.failedToClose))
@@ -87,7 +88,7 @@ final class ApplicationCommandController: ApplicationCommandControlling {
 
     if command.modifiers.contains(.background) ||
         command.application.metadata.isElectron {
-      plugins.launchApplication.execute(command) { error in
+      plugins.launch.execute(command) { error in
         if let error = error {
           promise(.failure(error))
         } else {
@@ -100,9 +101,10 @@ final class ApplicationCommandController: ApplicationCommandControlling {
     let isFrontMostApplication = command.application
       .bundleIdentifier == workspace.frontApplication?.bundleIdentifier
 
-    if isFrontMostApplication, plugins.activateApplication.execute(command) != nil {
-      if !windowListProvider.windowOwners().contains(command.application.bundleName) {
-        plugins.launchApplication.execute(command) { error in
+    if isFrontMostApplication {
+      if plugins.activate.execute(command) != nil,
+         !windowListProvider.windowOwners().contains(command.application.bundleName) {
+        plugins.launch.execute(command) { error in
           if error != nil {
             promise(.failure(ApplicationCommandControllingError.failedToActivate))
           } else {
@@ -110,14 +112,16 @@ final class ApplicationCommandController: ApplicationCommandControlling {
           }
         }
       } else {
-        promise(.success(()))
+        plugins.bringToFront.execute(command) { _ in
+          promise(.success(()))
+        }
       }
     } else {
-      plugins.launchApplication.execute(command) { error in
+      plugins.launch.execute(command) { error in
         if error != nil {
           promise(.failure(ApplicationCommandControllingError.failedToLaunch))
         } else if !self.windowListProvider.windowOwners().contains(command.application.bundleName) {
-          if let error = self.plugins.activateApplication.execute(command) {
+          if let error = self.plugins.activate.execute(command) {
             promise(.failure(error))
           } else {
             promise(.success(()))
