@@ -1,26 +1,42 @@
 import SwiftUI
 import ModelKit
 
-protocol KeyView {}
+protocol KeyView {
+  var colorScheme: ColorScheme { get }
+}
 
 extension KeyView {
   @ViewBuilder
   func keyBackgroundView(_ height: CGFloat) -> some View {
     ZStack {
       Rectangle()
+        .fill(Color.black.opacity( colorScheme == .light ? 0.3 : 0.9 ))
+        .cornerRadius(height * 0.1)
+        .offset(x: 0, y: 1)
+        .blur(radius: 2)
+        .scaleEffect(CGSize(width: 0.99, height: 1.0))
+
+      Rectangle()
+        .fill(Color.black.opacity( colorScheme == .light ? 0.33 : 0.9 ))
+        .cornerRadius(height * 0.1)
+        .offset(x: 0, y: height * 0.025)
+        .blur(radius: 1.0)
+        .scaleEffect(CGSize(width: 0.95, height: 1.0))
+
+      Rectangle()
         .fill(Color(.windowFrameTextColor))
-        .cornerRadius(height * 0.15)
+        .cornerRadius(height * 0.1)
         .opacity(0.25)
       Rectangle()
         .fill(Color(.windowBackgroundColor))
         .cornerRadius(height * 0.1)
-        .padding(height > 64 ? 2 : 1)
-        .shadow(radius: 1, y: 2)
-    }.shadow(radius: 2, y: 2)
+        .padding(0.1)
+    }
   }
 }
 
-struct RegularKeyIcon: View, KeyView {
+public struct RegularKeyIcon: View, KeyView {
+  @Environment(\.colorScheme) var colorScheme
   var letter: String
   var height: CGFloat
   private let animation = Animation
@@ -28,13 +44,13 @@ struct RegularKeyIcon: View, KeyView {
     .repeatForever(autoreverses: true)
   @State var glow: Bool
 
-  init(letter: String, height: CGFloat = 32, glow: Bool = false) {
+  public init(letter: String, height: CGFloat = 32, glow: Bool = false) {
     self.letter = letter.uppercased()
     self.height = height
     self._glow = .init(initialValue: glow)
   }
 
-  var body: some View {
+  public var body: some View {
     ZStack {
       keyBackgroundView(height)
         .foregroundColor(Color(.textColor).opacity(0.66))

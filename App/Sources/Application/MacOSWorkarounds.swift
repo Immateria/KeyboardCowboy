@@ -33,19 +33,28 @@ class MacOSWorkarounds {
 
   /// Check all available windows for `NaN` values on the windows origins
   ///  Fixes *** Assertion failure in +[NSToolbarView newViewForToolbar:inWindow:attachedToEdge:], NSToolbarView.m:282
-  static func avoidNaNOrigins() {
-    NSApplication.shared.windows.forEach { window in
-      if window.frame.origin.x.isNaN || window.frame.origin.y.isNaN {
-        let origin: CGPoint
+  static func avoidNaNOrigins(_ windows: [NSWindow]) {
+    guard let mainScreen = NSScreen.main else { return }
 
-        if let mainScreen = NSScreen.main {
-          origin = CGPoint(x: mainScreen.frame.size.width / 4,
-                           y: mainScreen.frame.size.height / 4)
-        } else {
-          origin = .zero
-        }
+    windows.forEach { window in
+      if window.frame.origin.x.isNaN || window.frame.origin.y.isNaN {
+        let startX = window.frame.size == .zero
+          ? mainScreen.frame.size.width / 4
+          : mainScreen.frame.size.width / 2
+
+        let startY = window.frame.size == .zero
+          ? mainScreen.frame.size.height / 4
+          : mainScreen.frame.size.height / 2
+
+        let x = startX - window.frame.size.width / 2
+        let y = startY - window.frame.size.height / 2
+        let origin = CGPoint(x: x, y: y)
 
         window.setFrameOrigin(origin)
+
+        DispatchQueue.main.async {
+          window.center()
+        }
       }
     }
   }

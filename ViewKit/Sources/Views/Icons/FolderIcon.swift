@@ -4,7 +4,7 @@ struct FolderIcon: View {
   @Environment(\.colorScheme) var colorScheme
 
   var havelockBlue: NSColor {
-    var color = NSColor(red:0.31, green:0.51, blue:0.76, alpha:1.00)
+    var color = NSColor(red: 0.31, green: 0.51, blue:0.76, alpha: 1.00)
     if colorScheme == .dark {
       color = color.blended(withFraction: 0.25, of: NSColor.systemIndigo) ?? color
     }
@@ -12,7 +12,7 @@ struct FolderIcon: View {
   }
 
   var blueGray: NSColor {
-    var color = NSColor(red:0.42, green:0.62, blue:0.80, alpha:1.00)
+    var color = NSColor(red: 0.42, green: 0.62, blue:0.80, alpha: 1.00)
     if colorScheme == .dark {
       color = color.blended(withFraction: 0.25, of: NSColor.systemIndigo) ?? color
     }
@@ -20,7 +20,7 @@ struct FolderIcon: View {
   }
 
   var babyBlue: NSColor {
-    var color = NSColor(red:0.60, green:0.80, blue:0.95, alpha:1.00)
+    var color = NSColor(red: 0.60, green: 0.80, blue: 0.95, alpha: 1.00)
     if colorScheme == .dark {
       color = color.blended(withFraction: 0.25, of: NSColor.systemIndigo) ?? color
     }

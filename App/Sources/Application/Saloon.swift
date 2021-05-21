@@ -56,7 +56,10 @@ class Saloon: ViewKitStore, MenubarControllerDelegate {
       fileName: configuration.fileName)
     self.builtInController = BuiltInCommandController()
 
-    if isRunningTests { super.init(groups: [], context: .preview()); return }
+    if isRunningTests || isRunningPreview {
+      super.init(groups: [], context: .preview())
+      return
+    }
 
     let installedApplications = ApplicationController.loadApplications()
 
@@ -144,7 +147,7 @@ class Saloon: ViewKitStore, MenubarControllerDelegate {
       createQuickRun()
       state = .launched
 
-      MacOSWorkarounds.avoidNaNOrigins()
+      MacOSWorkarounds.avoidNaNOrigins(NSApplication.shared.windows)
       NotificationCenter.default
         .publisher(for: .init(ApplicationCommandNotification.keyboardCowboyWasActivate.rawValue))
         .sink { _ in
@@ -203,6 +206,13 @@ class Saloon: ViewKitStore, MenubarControllerDelegate {
       .compactMap { $0 }
       .sink { [weak self] in
         self?.mainWindow = $0
+        MacOSWorkarounds.avoidNaNOrigins([$0])
+      }.store(in: &subscriptions)
+
+    application.publisher(for: \.keyWindow)
+      .compactMap { $0 }
+      .sink {
+        MacOSWorkarounds.avoidNaNOrigins([$0])
       }.store(in: &subscriptions)
   }
 

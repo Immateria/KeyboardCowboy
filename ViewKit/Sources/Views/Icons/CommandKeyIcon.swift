@@ -1,21 +1,12 @@
 import SwiftUI
 
-struct CommandKeyIcon: View {
+struct CommandKeyIcon: View, KeyView {
+  @Environment(\.colorScheme) var colorScheme
   var body: some View {
     GeometryReader { proxy in
       ZStack {
         GeometryReader { proxy in
-          Group {
-            Rectangle()
-              .fill(Color(.windowFrameTextColor))
-              .cornerRadius(7)
-              .opacity(0.25)
-            Rectangle()
-              .fill(Color(.windowBackgroundColor))
-              .cornerRadius(6)
-              .padding(1)
-              .shadow(radius: 1, y: 2)
-          }.shadow(radius: 2, y: 2)
+          keyBackgroundView(proxy.size.height)
 
           Group {
             Text("⌘")
@@ -27,7 +18,7 @@ struct CommandKeyIcon: View {
 
           Group {
             Text("command")
-              .font(Font.system(size: proxy.size.width * 0.19, weight: .regular, design: .rounded))
+              .font(Font.system(size: proxy.size.width * 0.17, weight: .regular, design: .rounded))
           }
           .frame(width: proxy.size.width, height: proxy.size.height,
                   alignment: .bottom)
@@ -46,7 +37,9 @@ struct CommandKeyIcon_Previews: PreviewProvider, TestPreviewProvider {
   }
 
   static var testPreview: some View {
+    VStack {
     CommandKeyIcon()
       .frame(width: 128, height: 128)
+    }.background(Color.white)
   }
 }

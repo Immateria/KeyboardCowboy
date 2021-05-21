@@ -2,6 +2,7 @@ import SwiftUI
 import ModelKit
 
 struct ModifierKeyIcon: View, KeyView {
+  @Environment(\.colorScheme) var colorScheme
   let key: ModifierKey
 
   var body: some View {
@@ -41,14 +42,7 @@ struct ModifierKeyIcon: View, KeyView {
         }
 
         Text(key.writtenValue)
-          .font(Font.system(size: {
-            switch key {
-            case .command:
-              return proxy.size.height * 0.18
-            default:
-              return proxy.size.height * 0.25
-            }
-          }(), weight: .regular, design: .rounded))
+          .font(Font.system(size: proxy.size.height * 0.27, weight: .regular, design: .rounded))
           .frame(height: proxy.size.height, alignment: .bottom)
           .offset(y: -proxy.size.width * 0.065)
       }

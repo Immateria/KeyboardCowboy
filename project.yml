@@ -189,6 +189,8 @@ schemes:
       config: Debug
       commandLineArguments:
         "-running-unit-tests": true
+      environmentVariables:
+        SOURCE_ROOT: $(SRCROOT)
       gatherCoverageData: true
       coverageTargets:
         - Keyboard-Cowboy

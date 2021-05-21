@@ -20,7 +20,9 @@ final class OpenPanelViewController: NSObject, ViewController, NSOpenSavePanelDe
       panel.allowsOtherFileTypes = fileType != nil
       responseHandler = handler
       panel.canChooseFiles = true
+      panel.canChooseDirectories = true
     case .selectFolder(let handler):
+      panel.canChooseFiles = false
       panel.canChooseDirectories = true
       responseHandler = handler
     }

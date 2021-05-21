@@ -10,3 +10,4 @@ Release/.*
 exportOptions.plist
 Build/*.xcarchive
 Build/Releases/*
+Generated/*

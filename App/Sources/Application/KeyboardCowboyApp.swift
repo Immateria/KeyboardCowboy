@@ -27,7 +27,7 @@ struct KeyboardCowboyApp: App {
         })
     }
     Settings {
-      KeyboardCowboySettingsView()
+      KeyboardCowboySettingsView(context: store.context)
     }
   }
 }

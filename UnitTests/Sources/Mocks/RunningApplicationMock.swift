@@ -13,4 +13,8 @@ struct RunningApplicationMock: RunningApplication, Equatable {
   func activate(options: NSApplication.ActivationOptions) -> Bool {
     activate
   }
+
+  func terminate() -> Bool {
+    return true
+  }
 }

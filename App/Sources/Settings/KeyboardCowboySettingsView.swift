@@ -3,19 +3,24 @@ import ViewKit
 
 struct KeyboardCowboySettingsView: View {
   private enum Tabs: Hashable {
-    case general, advanced
+    case general, keyboard
   }
+
+  let context: ViewKitFeatureContext
 
   var body: some View {
     TabView {
-      GeneralSettings().tag(Tabs.general)
-    }.padding()
-    .frame(width: 350, height: 200)
+      GeneralSettings(openPanelController: context.openPanel)
+        .tag(Tabs.general)
+      KeyboardSettings()
+        .tag(Tabs.general)
+    }
+    .frame(width: 650, alignment: .topLeading)
   }
 }
 
-struct SettingsView_Previews: PreviewProvider {
+struct KeyboardCowboySettingsView_Previews: PreviewProvider {
   static var previews: some View {
-    KeyboardCowboySettingsView()
+    KeyboardCowboySettingsView(context: ViewKitFeatureContext.preview())
   }
 }
