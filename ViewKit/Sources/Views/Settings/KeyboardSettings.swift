@@ -1,7 +1,6 @@
 import SwiftUI
-import ViewKit
 
-struct KeyboardSettings: View {
+public struct KeyboardSettings: View {
   @AppStorage("keyboardResetDelay") var keyboardResetDelay: TimeInterval = 2
 
   let formatter: NumberFormatter
@@ -11,7 +10,7 @@ struct KeyboardSettings: View {
     self.formatter.numberStyle = .decimal
   }
 
-  var body: some View {
+  public var body: some View {
     Form {
       HStack(alignment: .center) {
         Text("Keyboard Sequence reset:")

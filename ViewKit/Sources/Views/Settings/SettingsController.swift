@@ -2,11 +2,11 @@ import Cocoa
 import Combine
 import Foundation
 
-class SettingsController {
+public class SettingsController {
   private let userDefaults: UserDefaults
   private var subscriptions = Set<AnyCancellable>()
 
-  init(userDefaults: UserDefaults) {
+  public init(userDefaults: UserDefaults) {
     self.userDefaults = userDefaults
 
     userDefaults.publisher(for: \.hideDockIcon)

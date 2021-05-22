@@ -8,6 +8,6 @@ class DropCommandsControllerTests: XCTestCase {
     ], applications: [])
 
     XCTAssertEqual(result.first!.name,
-                   "Open github.com/zenangst/KeyboardCowboy")    
+                   "Open github.com/zenangst/KeyboardCowboy")
   }
 }

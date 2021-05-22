@@ -42,6 +42,7 @@ class Saloon: ViewKitStore, MenubarControllerDelegate {
   private var settingsController: SettingsController?
   private var subscriptions = Set<AnyCancellable>()
   private var state: ApplicationState = .initial
+  private var wizardStore = WizardStore()
 
   private weak var mainWindow: NSWindow?
 
@@ -56,48 +57,36 @@ class Saloon: ViewKitStore, MenubarControllerDelegate {
       fileName: configuration.fileName)
     self.builtInController = BuiltInCommandController()
 
-    if isRunningTests || isRunningPreview {
-      super.init(groups: [], context: .preview())
-      return
-    }
-
-    let installedApplications = ApplicationController.loadApplications()
-
-    IconController.shared.applications = installedApplications
-
     do {
-      var groups = try storageController.load()
-      pathFinderController.patch(&groups, applications: installedApplications)
-      let groupsController = Self.factory.groupsController(groups: groups)
-      let hotKeyController = try Self.factory.hotkeyController()
+      super.init(context: .preview())
 
-      let coreController = Self.factory.coreController(
-        launchArguments.isEnabled(.disableKeyboardShortcuts) ? .disabled : .enabled,
-        bundleIdentifier: bundleIdentifier,
-        builtInCommandController: builtInController,
-        groupsController: groupsController,
-        hotKeyController: hotKeyController,
-        installedApplications: installedApplications
-      )
+      if isRunningTests || isRunningPreview { return }
 
-      self.applicationTrigger = Self.factory.applicationTriggerController()
+      let installedApplications = ApplicationController.loadApplications()
+      IconController.shared.applications = installedApplications
 
-      self.coreController = coreController
+      if !wizardStore.hasFinishedWizard {
+        wizardStore.$finishedWizard
+          .dropFirst()
+          .sink { value in
+            if value {
+              do {
+                if let groups = self.wizardStore.postConfiguration(installedApplications) {
+                  try self.storageController.save(groups)
+                }
+                try self.configure(installedApplications)
+                self.set(.launched)
+              } catch let error {
+                self.handle(error)
+              }
+            }
+          }.store(in: &subscriptions)
 
-      let context = FeatureFactory(coreController: coreController).featureContext(
-        keyInputSubjectWrapper: Self.keyInputSubject)
-      let viewKitContext = context.viewKitContext(keyInputSubjectWrapper: Self.keyInputSubject)
-
-      super.init(groups: groups, context: viewKitContext)
-
-      self.quickRunFeatureController = QuickRunFeatureController(commandController: coreController.commandController)
-      self.subscribe(to: context)
-      self.context = viewKitContext
-      self.featureContext = context
-      self.subscribe(to: NSApplication.shared)
-      self.subscribe(to: NSWorkspace.shared)
+        self.view = .wizard(WizardView(openPanel: OpenPanelViewController().erase(), store: wizardStore))
+      } else {
+        try self.configure(installedApplications)
+      }
     } catch let error {
-      super.init(groups: [], context: .preview())
       self.handle(error)
     }
   }
@@ -111,6 +100,39 @@ class Saloon: ViewKitStore, MenubarControllerDelegate {
   }
 
   // MARK: Private methods
+
+  private func configure(_ installedApplications: [Application]) throws {
+    self.subscriptions = []
+    var groups = try storageController.load()
+    pathFinderController.patch(&groups, applications: installedApplications)
+    let groupsController = Self.factory.groupsController(groups: groups)
+    let hotKeyController = try Self.factory.hotkeyController()
+
+    let coreController = Self.factory.coreController(
+      launchArguments.isEnabled(.disableKeyboardShortcuts) ? .disabled : .enabled,
+      bundleIdentifier: bundleIdentifier,
+      builtInCommandController: builtInController,
+      groupsController: groupsController,
+      hotKeyController: hotKeyController,
+      installedApplications: installedApplications
+    )
+
+    self.applicationTrigger = Self.factory.applicationTriggerController()
+
+    self.coreController = coreController
+
+    let context = FeatureFactory(coreController: coreController).featureContext(
+      keyInputSubjectWrapper: Self.keyInputSubject)
+    let viewKitContext = context.viewKitContext(keyInputSubjectWrapper: Self.keyInputSubject)
+
+    self.context = viewKitContext
+    self.featureContext = context
+    self.groups = groups
+    self.quickRunFeatureController = QuickRunFeatureController(commandController: coreController.commandController)
+    self.subscribe(to: NSApplication.shared)
+    self.subscribe(to: NSWorkspace.shared)
+    self.subscribe(to: context)
+  }
 
   private func handle(_ error: Error) {
     let permissionController = Self.factory.permissionsController()

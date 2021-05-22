@@ -59,11 +59,13 @@ public struct Workflow: Identifiable, Codable, Hashable {
 
   public init(id: String = UUID().uuidString, name: String,
               trigger: Trigger? = nil,
-              commands: [Command] = []) {
+              commands: [Command] = [],
+              isEnabled: Bool = true) {
     self.id = id
     self.commands = commands
     self.trigger = trigger
     self.name = name
+    self.isEnabled = isEnabled
   }
 
   enum CodingKeys: String, CodingKey {

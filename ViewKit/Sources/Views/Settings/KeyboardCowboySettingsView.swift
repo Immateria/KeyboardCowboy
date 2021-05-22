@@ -1,14 +1,17 @@
 import SwiftUI
-import ViewKit
 
-struct KeyboardCowboySettingsView: View {
+public struct KeyboardCowboySettingsView: View {
   private enum Tabs: Hashable {
     case general, keyboard
   }
 
-  let context: ViewKitFeatureContext
+  private let context: ViewKitFeatureContext
 
-  var body: some View {
+  public init(context: ViewKitFeatureContext) {
+    self.context = context
+  }
+
+  public var body: some View {
     TabView {
       GeneralSettings(openPanelController: context.openPanel)
         .tag(Tabs.general)

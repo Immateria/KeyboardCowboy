@@ -1,7 +1,6 @@
 import SwiftUI
-import ViewKit
 
-struct GeneralSettings: View {
+public struct GeneralSettings: View {
   @AppStorage("configurationPath") var configurationPath = "~"
   @AppStorage("dotFileConfiguration") var dotFileConfiguration = false
   @AppStorage("openWindowOnLaunch") var openWindowOnLaunch = false
@@ -11,7 +10,7 @@ struct GeneralSettings: View {
   @ObservedObject var openPanelController: OpenPanelController
 
   // swiftlint:disable line_length
-  var body: some View {
+  public var body: some View {
     Form {
       VStack {
         VStack(alignment: .leading) {
@@ -55,9 +54,4 @@ struct GeneralSettings_Previews: PreviewProvider {
   static var previews: some View {
     GeneralSettings(openPanelController: OpenPanelPreviewController().erase())
   }
-}
-
-fileprivate final class OpenPanelPreviewController: ViewController {
-  let state = ""
-  func perform(_ action: OpenPanelAction) {}
 }

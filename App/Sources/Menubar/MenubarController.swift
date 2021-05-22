@@ -1,7 +1,7 @@
 import Cocoa
 import Sparkle
 
-protocol MenubarControllerDelegate: class {
+protocol MenubarControllerDelegate: AnyObject {
   func menubarController(_ controller: MenubarController, didTapOpenApplication openApplicationMenuItem: NSMenuItem)
 }
 

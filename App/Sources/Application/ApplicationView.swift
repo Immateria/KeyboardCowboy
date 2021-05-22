@@ -5,6 +5,7 @@ enum ApplicationView: View {
   case hidden
   case needsPermission(PermissionsView)
   case content(MainView)
+  case wizard(WizardView)
 
   var body: some View {
     switch self {
@@ -14,6 +15,8 @@ enum ApplicationView: View {
       view.frame(minWidth: 900, minHeight: 520)
     case .needsPermission(let view):
       view.frame(minWidth: 600, minHeight: 320)
+    case .wizard(let view):
+      view
     }
   }
 }
