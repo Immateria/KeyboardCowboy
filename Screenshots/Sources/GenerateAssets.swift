@@ -15,4 +15,36 @@ class GenerateAssets: XCTestCase {
       Generator.execute(CommandKeyIcon().preferredColorScheme(.dark), name: "KeyboardSettings-Dark@2x", size: CGSize(width: 96, height: 96)),
     ], timeout: 10)
   }
+
+  func testGenerateMenubarIcons() {
+    wait(for: [
+      Generator.execute(MenubarIcon(color: Color(.textColor), size: CGSize(width: 11, height: 11)).preferredColorScheme(.light),
+                        name: "MenubarIcon-Light",
+                        size: CGSize(width: 11, height: 11)),
+      Generator.execute(MenubarIcon(color: Color(.textColor), size: CGSize(width: 22, height: 22)).preferredColorScheme(.light),
+                        name: "MenubarIcon-Light@2x",
+                        size: CGSize(width: 22, height: 22)),
+
+      Generator.execute(MenubarIcon(color: Color(.textColor), size: CGSize(width: 11, height: 11)).preferredColorScheme(.dark),
+                        name: "MenubarIcon-Dark",
+                        size: CGSize(width: 11, height: 11)),
+      Generator.execute(MenubarIcon(color: Color(.textColor), size: CGSize(width: 22, height: 22)).preferredColorScheme(.dark),
+                        name: "MenubarIcon-Dark@2x",
+                        size: CGSize(width: 22, height: 22)),
+
+      Generator.execute(MenubarIcon(color: Color.accentColor, size: CGSize(width: 11, height: 11)).preferredColorScheme(.light),
+                        name: "MenubarIcon-Light-Active",
+                        size: CGSize(width: 11, height: 11)),
+      Generator.execute(MenubarIcon(color: Color.accentColor, size: CGSize(width: 22, height: 22)).preferredColorScheme(.light),
+                        name: "MenubarIcon-Light-Active@2x",
+                        size: CGSize(width: 22, height: 22)),
+
+      Generator.execute(MenubarIcon(color: Color.accentColor, size: CGSize(width: 11, height: 11)).preferredColorScheme(.dark),
+                        name: "MenubarIcon-Dark-Active",
+                        size: CGSize(width: 11, height: 11)),
+      Generator.execute(MenubarIcon(color: Color.accentColor, size: CGSize(width: 22, height: 22)).preferredColorScheme(.dark),
+                        name: "MenubarIcon-Dark-Active@2x",
+                        size: CGSize(width: 22, height: 22)),
+    ], timeout: 10)
+  }
 }

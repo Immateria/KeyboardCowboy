@@ -1,12 +1,34 @@
 {
   "images" : [
     {
-      "filename" : "icon_128x128_active.png",
+      "filename" : "MenubarIcon-Light-Active.png",
       "idiom" : "mac",
       "scale" : "1x"
     },
     {
-      "filename" : "icon_128x128_active@2x.png",
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "filename" : "MenubarIcon-Dark-Active.png",
+      "idiom" : "mac",
+      "scale" : "1x"
+    },
+    {
+      "filename" : "MenubarIcon-Light-Active@2x.png",
+      "idiom" : "mac",
+      "scale" : "2x"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "filename" : "MenubarIcon-Dark-Active@2x.png",
       "idiom" : "mac",
       "scale" : "2x"
     }
