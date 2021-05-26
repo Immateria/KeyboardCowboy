@@ -1,4 +1,5 @@
 @testable import ViewKit
+import Apps
 import XCTest
 import ModelKit
 

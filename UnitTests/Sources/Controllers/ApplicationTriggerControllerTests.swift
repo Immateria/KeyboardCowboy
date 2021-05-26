@@ -1,3 +1,4 @@
+import Apps
 import XCTest
 @testable import ModelKit
 @testable import LogicFramework

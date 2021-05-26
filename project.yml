@@ -89,6 +89,7 @@ targets:
     scheme: {}
     dependencies:
       - target: Keyboard-Cowboy
+      - package: Apps
       - package: SnapshotTesting
     settings:
       groups: [app]

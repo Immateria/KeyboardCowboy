@@ -2,6 +2,7 @@
 @testable import LogicFramework
 @testable import ModelKit
 @testable import ViewKit
+import Apps
 import Foundation
 import XCTest
 

@@ -1,6 +1,7 @@
 @testable import Keyboard_Cowboy
 @testable import LogicFramework
 @testable import ModelKit
+import Apps
 import Foundation
 import ViewKit
 import XCTest
