@@ -4,6 +4,19 @@ import ModelKit
 struct ModifierKeyIcon: View, KeyView {
   @Environment(\.colorScheme) var colorScheme
   let key: ModifierKey
+  let alignment: Alignment
+
+  init(key: ModifierKey, alignment: Alignment? = nil) {
+    self.key = key
+
+    if let alignment = alignment {
+      self.alignment = alignment
+    } else {
+      self.alignment = key == .shift
+        ? .bottomLeading : .topTrailing
+    }
+
+  }
 
   var body: some View {
     GeometryReader { proxy in
@@ -15,26 +28,20 @@ struct ModifierKeyIcon: View, KeyView {
           .font(Font.system(size: proxy.size.height * 0.23,
                             weight: .medium, design: .rounded))
         }
-          .frame(width: proxy.size.width,
-                 height: proxy.size.height,
-                 alignment: key == .shift
-                  ? .bottomLeading : .topTrailing)
-          .offset(x: key == .shift
-                    ? proxy.size.width * 0.065
-                    : -proxy.size.width * 0.085,
-                  y: key == .shift
-                    ? -proxy.size.width * 0.045
-                    : proxy.size.width * 0.085)
+        .padding(6)
+        .frame(width: proxy.size.width,
+               height: proxy.size.height,
+               alignment: alignment)
 
         if key == .function {
           Group {
             Image(systemName: "globe")
               .resizable()
-              .frame(width: proxy.size.height * 0.25,
-                     height: proxy.size.height * 0.25,
+              .frame(width: proxy.size.height * 0.2,
+                     height: proxy.size.height * 0.2,
                      alignment: .bottomLeading)
-              .offset(x: proxy.size.width * 0.085,
-                      y: -proxy.size.width * 0.085)
+              .offset(x: proxy.size.width * 0.1,
+                      y: -proxy.size.width * 0.1)
           }
           .frame(width: proxy.size.width,
                  height: proxy.size.height,
@@ -42,7 +49,7 @@ struct ModifierKeyIcon: View, KeyView {
         }
 
         Text(key.writtenValue)
-          .font(Font.system(size: proxy.size.height * 0.27, weight: .regular, design: .rounded))
+          .font(Font.system(size: proxy.size.height * 0.23, weight: .regular, design: .rounded))
           .frame(height: proxy.size.height, alignment: .bottom)
           .offset(y: -proxy.size.width * 0.065)
       }

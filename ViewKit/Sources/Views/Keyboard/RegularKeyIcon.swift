@@ -37,16 +37,36 @@ extension KeyView {
 
 public struct RegularKeyIcon: View, KeyView {
   @Environment(\.colorScheme) var colorScheme
-  var letter: String
+  var letters: [Letter]
+  var width: CGFloat
   var height: CGFloat
+  var alignment: Alignment
   private let animation = Animation
     .easeInOut(duration: 1.5)
     .repeatForever(autoreverses: true)
   @State var glow: Bool
 
-  public init(letter: String, height: CGFloat = 32, glow: Bool = false) {
-    self.letter = letter.uppercased()
+  public init(letters: [String],
+              width: CGFloat = 32,
+              height: CGFloat = 32,
+              alignment: Alignment = .center,
+              glow: Bool = false) {
+    self.letters = letters.compactMap({ Letter(string: $0.uppercased()) })
+    self.width = width
     self.height = height
+    self.alignment = alignment
+    self._glow = .init(initialValue: glow)
+  }
+
+  public init(letter: String ...,
+              width: CGFloat = 32,
+              height: CGFloat = 32,
+              alignment: Alignment = .center, glow: Bool = false) {
+    self.letters = letter
+      .compactMap({ Letter(string: $0.uppercased()) })
+    self.width = width
+    self.height = height
+    self.alignment = alignment
     self._glow = .init(initialValue: glow)
   }
 
@@ -55,8 +75,8 @@ public struct RegularKeyIcon: View, KeyView {
       keyBackgroundView(height)
         .foregroundColor(Color(.textColor).opacity(0.66))
       letter(height: height)
-        .frame(minWidth: height, minHeight: height)
         .fixedSize(horizontal: true, vertical: true)
+        .frame(minWidth: width, minHeight: height, alignment: alignment)
     }
     .onAppear {
       if glow {
@@ -66,25 +86,29 @@ public struct RegularKeyIcon: View, KeyView {
   }
 
   func letter(height: CGFloat) -> some View {
-    Text(letter)
-      .font(Font.system(size: height * 0.3, weight: .regular, design: .rounded))
-      .foregroundColor(.clear)
-      .overlay(
-        Rectangle()
-          .foregroundColor(glow
-                            ? Color.accentColor .opacity(0.5)
-                            : Color(.textColor).opacity(0.66))
-          .mask(
-            Text(letter)
-              .font(Font.system(size: height * 0.3, weight: .regular, design: .rounded))
+    VStack {
+      ForEach(letters) { letter in
+        Text(letter.string)
+          .font(Font.system(size: height * 0.4, weight: .regular, design: .rounded))
+          .foregroundColor(.clear)
+          .overlay(
+            Rectangle()
+              .foregroundColor(glow
+                                ? Color.accentColor .opacity(0.5)
+                                : Color(.textColor).opacity(0.66))
+              .mask(
+                Text(letter.string)
+                  .font(Font.system(size: height * 0.4, weight: .regular, design: .rounded))
+              )
           )
-      )
-      .shadow(color:
-                Color(.controlAccentColor).opacity(glow ? 1.0 : 0.0),
-              radius: 1,
-              y: glow ? 0 : 2
-      )
-      .padding(.horizontal, height * 0.2)
+          .shadow(color:
+                    Color(.controlAccentColor).opacity(glow ? 1.0 : 0.0),
+                  radius: 1,
+                  y: glow ? 0 : 2
+          )
+          //.padding(.horizontal, height * 0.2)
+      }
+    }
   }
 }
 
