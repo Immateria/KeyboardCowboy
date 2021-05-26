@@ -11,6 +11,9 @@ configFiles:
   Debug: XcodeGen/Debug.xcconfig
   Release: XcodeGen/Release.xcconfig
 packages:
+  Apps:
+    url: https://github.com/zenangst/Apps
+    branch: main
   DirectoryObserver:
     url: https://github.com/zenangst/DirectoryObserver
     branch: main
@@ -46,6 +49,7 @@ targets:
       - target: ModelKit
       - target: ViewKit
       - target: LogicFramework
+      - package: Apps
       - package: DirectoryObserver
       - package: LaunchArguments
       - package: Sparkle
@@ -56,7 +60,7 @@ targets:
       groups: [app]
       base:
         ASSETCATALOG_COMPILER_APPICON_NAME: "AppIcon"
-        CURRENT_PROJECT_VERSION: 129
+        CURRENT_PROJECT_VERSION: 131
         ENABLE_HARDENED_RUNTIME: true
         INFOPLIST_FILE: "App/Resources/Info.plist"
         MARKETING_VERSION: 0.17.0
@@ -131,6 +135,7 @@ targets:
     dependencies:
       - target: BridgeKit
       - target: ModelKit
+      - package: Apps
     sources:
       - LogicFramework
       - Shared
@@ -144,6 +149,8 @@ targets:
   ModelKit:
     type: framework
     platform: "macOS"
+    dependencies:
+      - package: Apps
     sources:
       - ModelKit
     settings:
@@ -159,6 +166,7 @@ targets:
     dependencies:
       - target: BridgeKit
       - target: ModelKit
+      - package: Apps
       - package: Introspect
       - package: MbSwiftUIFirstResponder
     sources:

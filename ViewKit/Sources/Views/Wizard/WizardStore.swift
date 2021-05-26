@@ -1,3 +1,4 @@
+import Apps
 import Combine
 import ModelKit
 import SwiftUI

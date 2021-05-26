@@ -1,3 +1,4 @@
+import Apps
 import Foundation
 
 public struct ApplicationTrigger: Hashable, Identifiable, Codable {

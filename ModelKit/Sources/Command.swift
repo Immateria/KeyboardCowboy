@@ -1,3 +1,4 @@
+import Apps
 import Foundation
 
 /// A `Command` is a polymorphic entity that is used

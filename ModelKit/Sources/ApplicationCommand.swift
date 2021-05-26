@@ -1,3 +1,4 @@
+import Apps
 import Foundation
 
 /// An application command is a container that is used for

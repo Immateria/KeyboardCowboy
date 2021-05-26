@@ -1,3 +1,4 @@
+import Apps
 import Foundation
 
 /// This command is used to open folders, files, web

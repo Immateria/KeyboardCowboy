@@ -1,3 +1,4 @@
+import Apps
 import Cocoa
 import ModelKit
 import SwiftUI

@@ -1,3 +1,4 @@
+import Apps
 import ModelKit
 
 public typealias ApplicationProvider = AnyStateController<[Application]>

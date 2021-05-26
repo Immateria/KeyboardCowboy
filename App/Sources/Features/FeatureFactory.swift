@@ -1,3 +1,4 @@
+import Apps
 import Foundation
 import LogicFramework
 import ModelKit

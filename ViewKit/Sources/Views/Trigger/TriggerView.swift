@@ -1,3 +1,4 @@
+import Apps
 import BridgeKit
 import SwiftUI
 import ModelKit

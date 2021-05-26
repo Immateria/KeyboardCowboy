@@ -1,3 +1,4 @@
+import Apps
 import Foundation
 
 /// A group is a collection of `Workflow`s. Eligability is determined
