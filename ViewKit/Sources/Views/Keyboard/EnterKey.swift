@@ -3,7 +3,6 @@ import SwiftUI
 struct EnterKey: View, KeyView {
   @Environment(\.colorScheme) var colorScheme
   let segments = ShapeParameters().segments
-
   let width: CGFloat
   let height: CGFloat
 
@@ -18,7 +17,7 @@ struct EnterKey: View, KeyView {
 
       shape(Color.black.opacity( colorScheme == .light ? 0.33 : 0.9 ))
         .transform {
-          $0.offset(x: 0, y: height * 0.025)
+          $0.offset(x: 0, y: height * 0.005)
             .blur(radius: 1.0)
             .scaleEffect(CGSize(width: 0.95, height: 1.0))
         }
@@ -37,7 +36,7 @@ struct EnterKey: View, KeyView {
         .font(Font.system(size: height * 0.1, weight: .regular, design: .rounded))
         .padding()
         .frame(width: width, height: height, alignment: .trailing)
-        .offset(x: width * 0.025, y: -height * 0.125)
+        .offset(x: width * 0.155, y: -height * 0.155)
 
     }.frame(width: width, height: height)
   }
@@ -77,6 +76,7 @@ struct EnterKey_Previews: PreviewProvider, TestPreviewProvider {
 
   static var testPreview: some View {
     EnterKey(width: 64, height: 128)
+      .padding()
   }
 }
 
@@ -90,24 +90,24 @@ struct ShapeParameters {
   static let cornerRadius: CGFloat = 0.05
   let segments = [
     Segment(
-      line: CGPoint(x: 0.1, y: 0.1 + cornerRadius),
-      curve: CGPoint(x: 0.1 + cornerRadius, y: 0.1),
-      control: CGPoint(x: 0.1, y: 0.1)
+      line: CGPoint(x: 0.0, y: 0.0 + cornerRadius),
+      curve: CGPoint(x: 0.0 + cornerRadius, y: 0.0),
+      control: CGPoint(x: 0.0, y: 0.0)
     ),
     Segment(
-      line: CGPoint(x: 0.9 - cornerRadius, y: 0.1),
-      curve: CGPoint(x: 0.9, y: 0.1 + cornerRadius),
-      control: CGPoint(x: 0.9, y: 0.1)
+      line: CGPoint(x: 1.0 - cornerRadius, y: 0.0),
+      curve: CGPoint(x: 1.0, y: 0.0 + cornerRadius),
+      control: CGPoint(x: 1.0, y: 0.0)
     ),
     Segment(
-      line: CGPoint(x: 0.9 , y: 0.9 - cornerRadius),
-      curve: CGPoint(x: 0.9 - cornerRadius, y: 0.9),
-      control: CGPoint(x: 0.9, y: 0.9)
+      line: CGPoint(x: 1.0 , y: 1.0 - cornerRadius),
+      curve: CGPoint(x: 1.0 - cornerRadius, y: 1.0),
+      control: CGPoint(x: 1.0, y: 1.0)
     ),
     Segment(
-      line: CGPoint(x: 0.3 + cornerRadius, y: 0.9),
-      curve: CGPoint(x: 0.3, y: 0.9 - cornerRadius),
-      control: CGPoint(x: 0.3, y: 0.9)
+      line: CGPoint(x: 0.3 + cornerRadius, y: 1.0),
+      curve: CGPoint(x: 0.3, y: 1.0 - cornerRadius),
+      control: CGPoint(x: 0.3, y: 1.0)
     ),
     Segment(
       line: CGPoint(x: 0.3,
@@ -118,9 +118,9 @@ struct ShapeParameters {
                        y: 0.45)
     ),
     Segment(
-      line: CGPoint(x: 0.1 + cornerRadius, y: 0.45),
-      curve: CGPoint(x: 0.1, y: 0.45 - cornerRadius),
-      control: CGPoint(x: 0.1, y: 0.45)
+      line: CGPoint(x: 0.0 + cornerRadius, y: 0.45),
+      curve: CGPoint(x: 0.0, y: 0.45 - cornerRadius),
+      control: CGPoint(x: 0.0, y: 0.45)
     ),
   ]
 }

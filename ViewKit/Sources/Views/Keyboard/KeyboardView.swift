@@ -45,7 +45,7 @@ struct KeyboardView: View {
           RegularKeyIcon(letters: ["", "⌫"],
                          width: 56,
                          alignment: .bottomTrailing)
-            .frame(width: 64, height: 48)
+            .frame(width: 74, height: 48)
         }
 
         HStack {
@@ -80,7 +80,7 @@ struct KeyboardView: View {
           }
 
           ModifierKeyIcon(key: .shift, alignment: .bottomTrailing)
-            .frame(width: 100, height: 48)
+            .frame(width: 110, height: 48)
         }
 
         HStack {
@@ -94,7 +94,7 @@ struct KeyboardView: View {
             .frame(width: 64, height: 48)
 
           RegularKeyIcon(letter: "")
-            .frame(width: 256, height: 48)
+            .frame(width: 265, height: 48)
 
           ModifierKeyIcon(key: .command, alignment: .topLeading)
             .frame(width: 64, height: 48)
@@ -121,7 +121,8 @@ struct KeyboardView: View {
           }.frame(width: 48, height: 64)
         }
       }
-      EnterKey(width: 64, height: 128)
+      EnterKey(width: 48, height: 104)
+        .offset(CGSize(width: 0, height: -31.0))
     }
     .padding()
   }
