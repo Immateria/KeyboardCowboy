@@ -89,7 +89,7 @@ public struct RegularKeyIcon: View, KeyView {
     VStack {
       ForEach(letters) { letter in
         Text(letter.string)
-          .font(Font.system(size: height * 0.4, weight: .regular, design: .rounded))
+          .font(Font.system(size: height * 0.3, weight: .regular, design: .rounded))
           .foregroundColor(.clear)
           .overlay(
             Rectangle()
@@ -98,7 +98,7 @@ public struct RegularKeyIcon: View, KeyView {
                                 : Color(.textColor).opacity(0.66))
               .mask(
                 Text(letter.string)
-                  .font(Font.system(size: height * 0.4, weight: .regular, design: .rounded))
+                  .font(Font.system(size: height * 0.3, weight: .regular, design: .rounded))
               )
           )
           .shadow(color:
@@ -106,7 +106,7 @@ public struct RegularKeyIcon: View, KeyView {
                   radius: 1,
                   y: glow ? 0 : 2
           )
-          //.padding(.horizontal, height * 0.2)
+//          .padding(.horizontal, height * 0.2)
       }
     }
   }

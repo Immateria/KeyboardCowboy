@@ -15,7 +15,6 @@ struct ModifierKeyIcon: View, KeyView {
       self.alignment = key == .shift
         ? .bottomLeading : .topTrailing
     }
-
   }
 
   var body: some View {
