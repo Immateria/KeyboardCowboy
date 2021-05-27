@@ -16,6 +16,38 @@ class GenerateAssets: XCTestCase {
     ], timeout: 10)
   }
 
+  func testGenerateKeyboardImage() {
+    wait(for: [
+      Generator.execute(KeyboardView(width: 400)
+                          .rotation3DEffect(.degrees(50), axis: (x: 1, y: 0, z: 0))
+                          .frame(width: 512, height: 150, alignment: .center)
+                          .preferredColorScheme(.dark)
+                        ,
+                        name: "Keyboard-Dark",
+                        size: CGSize(width: 512, height: 150)),
+      Generator.execute(KeyboardView(width: 800)
+                          .rotation3DEffect(.degrees(50), axis: (x: 1, y: 0, z: 0))
+                          .frame(width: 1024, height: 300, alignment: .center)
+                          .preferredColorScheme(.dark),
+                        name: "Keyboard-Dark@2x",
+                        size: CGSize(width: 1024, height: 300)),
+
+      Generator.execute(KeyboardView(width: 400)
+                          .rotation3DEffect(.degrees(50), axis: (x: 1, y: 0, z: 0))
+                          .frame(width: 512, height: 150, alignment: .center)
+                          .preferredColorScheme(.light)
+                        ,
+                        name: "Keyboard-Light",
+                        size: CGSize(width: 512, height: 150)),
+      Generator.execute(KeyboardView(width: 800)
+                          .rotation3DEffect(.degrees(50), axis: (x: 1, y: 0, z: 0))
+                          .frame(width: 1024, height: 300, alignment: .center)
+                          .preferredColorScheme(.light),
+                        name: "Keyboard-Light@2x",
+                        size: CGSize(width: 1024, height: 300))
+    ], timeout: 10)
+  }
+
   func testGenerateMenubarIcons() {
     wait(for: [
       Generator.execute(MenubarIcon(color: Color(.textColor), size: CGSize(width: 11, height: 11)).preferredColorScheme(.light),

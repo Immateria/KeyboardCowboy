@@ -2,17 +2,64 @@ import SwiftUI
 
 struct KeyboardView: View {
 
-  let row2 = [
-    "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "Å", "^"
-  ].compactMap({ Letter(string: $0) })
+  let touchbar = false
 
-  let row3 = [
-    "A", "S", "D", "F", "G", "H", "J", "K", "L", "Ö", "Ä"
-  ].compactMap({ Letter(string: $0) })
+  @ViewBuilder
+  func row2_1(_ size: CGFloat) -> some View {
+    RegularKeyIcon(letters: ["Q"], width: size, height: size).frame(width: size, height: size)
+    RegularKeyIcon(letters: ["W"], width: size, height: size).frame(width: size, height: size)
+    RegularKeyIcon(letters: ["E"], width: size, height: size).frame(width: size, height: size)
+    RegularKeyIcon(letters: ["R"], width: size, height: size).frame(width: size, height: size)
+    RegularKeyIcon(letters: ["T"], width: size, height: size).frame(width: size, height: size)
+    RegularKeyIcon(letters: ["Y"], width: size, height: size).frame(width: size, height: size)
+  }
 
-  let row4 = [
-    ">", "Z", "X", "C", "V", "B", "N", "M", ",", ".", "-"
-  ].compactMap({ Letter(string: $0) })
+  @ViewBuilder
+  func row2_2(_ size: CGFloat) -> some View {
+    RegularKeyIcon(letters: ["U"], width: size, height: size).frame(width: size, height: size)
+    RegularKeyIcon(letters: ["I"], width: size, height: size).frame(width: size, height: size)
+    RegularKeyIcon(letters: ["O"], width: size, height: size).frame(width: size, height: size)
+    RegularKeyIcon(letters: ["P"], width: size, height: size).frame(width: size, height: size)
+    RegularKeyIcon(letters: ["Å"], width: size, height: size).frame(width: size, height: size)
+    RegularKeyIcon(letters: ["^"], width: size, height: size).frame(width: size, height: size)
+  }
+
+  @ViewBuilder
+  func row3_1(_ size: CGFloat) -> some View {
+    RegularKeyIcon(letters: ["A"], width: size, height: size).frame(width: size, height: size)
+    RegularKeyIcon(letters: ["S"], width: size, height: size).frame(width: size, height: size)
+    RegularKeyIcon(letters: ["D"], width: size, height: size).frame(width: size, height: size)
+    RegularKeyIcon(letters: ["F"], width: size, height: size).frame(width: size, height: size)
+    RegularKeyIcon(letters: ["G"], width: size, height: size).frame(width: size, height: size)
+  }
+  @ViewBuilder
+  func row3_2(_ size: CGFloat) -> some View {
+    RegularKeyIcon(letters: ["H"], width: size, height: size).frame(width: size, height: size)
+    RegularKeyIcon(letters: ["J"], width: size, height: size).frame(width: size, height: size)
+    RegularKeyIcon(letters: ["K"], width: size, height: size).frame(width: size, height: size)
+    RegularKeyIcon(letters: ["L"], width: size, height: size).frame(width: size, height: size)
+    RegularKeyIcon(letters: ["Ö"], width: size, height: size).frame(width: size, height: size)
+    RegularKeyIcon(letters: ["Ä"], width: size, height: size).frame(width: size, height: size)
+  }
+
+  @ViewBuilder
+  func row4_1(_ size: CGFloat) -> some View {
+    RegularKeyIcon(letters: [">"], width: size, height: size).frame(width: size, height: size)
+    RegularKeyIcon(letters: ["Z"], width: size, height: size).frame(width: size, height: size)
+    RegularKeyIcon(letters: ["X"], width: size, height: size).frame(width: size, height: size)
+    RegularKeyIcon(letters: ["C"], width: size, height: size).frame(width: size, height: size)
+    RegularKeyIcon(letters: ["V"], width: size, height: size).frame(width: size, height: size)
+  }
+
+  @ViewBuilder
+  func row4_2(_ size: CGFloat) -> some View {
+    RegularKeyIcon(letters: ["B"], width: size, height: size).frame(width: size, height: size)
+    RegularKeyIcon(letters: ["N"], width: size, height: size).frame(width: size, height: size)
+    RegularKeyIcon(letters: ["M"], width: size, height: size).frame(width: size, height: size)
+    RegularKeyIcon(letters: [";", ","], width: size, height: size).frame(width: size, height: size)
+    RegularKeyIcon(letters: [":", "."], width: size, height: size).frame(width: size, height: size)
+    RegularKeyIcon(letters: ["-", "_"], width: size, height: size).frame(width: size, height: size)
+  }
 
   @ViewBuilder
   func row1_1(_ size: CGFloat) -> some View {
@@ -41,124 +88,154 @@ struct KeyboardView: View {
   let width: CGFloat
 
   var body: some View {
-      ZStack(alignment: .trailing) {
-        VStack(alignment: .leading, spacing: relative(8)) {
+    ZStack(alignment: .trailing) {
+      VStack(alignment: .leading, spacing: relative(8)) {
+        if touchbar {
           HStack(spacing: relative(8)) {
-            row1_1(relative(48))
-            row1_2(relative(48))
-            RegularKeyIcon(letters: ["", "⌫"],
-                           width: relative(56),
-                           height: relative(48),
-                           alignment: .bottomTrailing)
-              .frame(width: relative(74), height: relative(48))
-          }
+            RegularKeyIcon(letter: "esc")
+              .frame(width: relative(48), height: relative(28))
 
-          HStack(alignment: .top, spacing: 0) {
-            VStack(alignment: .leading, spacing: 0) {
-              HStack(spacing: relative(8)) {
-                RegularKeyIcon(letters: [" ", "⇥"],
-                               width: relative(60),
-                               height: relative(48),
-                               alignment: .bottomLeading)
-                  .frame(width: relative(72), height: relative(48))
-                ForEach(row2) { letter in
-                  RegularKeyIcon(letter: letter.string,
-                                 width: relative(48),
-                                 height: relative(48))
-                    .frame(width: relative(48), height: relative(48))
-                }
+            HStack(spacing: 0) {
+              HStack {
+                RegularKeyIcon(letter: "►", height: relative(22))
+                  .frame(width: relative(48), height: relative(22))
+                  .colorScheme(.dark)
+                  .opacity(0.6)
+                RegularKeyIcon(letter: "◼︎", height: relative(22))
+                  .frame(width: relative(48), height: relative(22))
+                  .colorScheme(.dark)
+                  .opacity(0.6)
               }
 
-              Spacer().frame(height: relative(8))
+              HStack(spacing: 0) {
+                RegularKeyIcon(letter: "<", height: relative(22))
+                  .frame(width: relative(48), height: relative(22))
+                  .colorScheme(.dark)
+                  .opacity(0.6)
 
-              HStack(spacing: relative(8)) {
-                RegularKeyIcon(letters: ["", "⇪"],
-                               width: relative(72),
-                               height: relative(48),
-                               alignment: .bottomLeading)
-                  .frame(width: relative(84), height: relative(48))
-                ForEach(row3) { letter in
-                  RegularKeyIcon(letter: letter.string,
-                                 width: relative(48),
-                                 height: relative(48))
-                    .frame(width: relative(48), height: relative(48))
-                }
-                RegularKeyIcon(letters: ["*", "@"],
-                               width: relative(48), height: relative(48))
-                  .frame(width: relative(48), height: relative(48))
+                RegularKeyIcon(letter: ">", height: relative(22))
+                  .frame(width: relative(48), height: relative(22))
+                  .colorScheme(.dark)
+                  .opacity(0.6)
+
               }
+
+              Spacer()
             }
-            EnterKey(width: relative(48),
-                     height: relative(48) + relative(48) + relative(8))
-              .offset(CGSize(width: relative(-2),
-                             height: relative(1)))
+            .colorScheme(.dark)
+            .frame(height: relative(28))
+            .padding(relative(2))
+            .background(Color.black.opacity(0.6))
+            .cornerRadius(8)
           }
+        }
 
-          HStack(spacing: relative(8)) {
-            ModifierKeyIcon(key: .shift)
-              .frame(width: relative(68), height: relative(48))
+        HStack(spacing: relative(8)) {
+          row1_1(relative(48))
+          row1_2(relative(48))
+          RegularKeyIcon(letters: ["", "⌫"],
+                         width: relative(56),
+                         height: relative(48),
+                         alignment: .bottomTrailing)
+            .frame(width: relative(74), height: relative(48))
+        }
 
-            ForEach(row4) { letter in
-              RegularKeyIcon(letter: letter.string,
+        HStack(alignment: .top, spacing: 0) {
+          VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: relative(8)) {
+              RegularKeyIcon(letters: [" ", "⇥"],
+                             width: relative(60),
+                             height: relative(48),
+                             alignment: .bottomLeading)
+                .frame(width: relative(72), height: relative(48))
+              row2_1(relative(48))
+              row2_2(relative(48))
+            }
+
+            Spacer().frame(height: relative(8))
+
+            HStack(spacing: relative(8)) {
+              RegularKeyIcon(letters: ["∘", "⇪"],
+                             width: relative(72),
+                             height: relative(48),
+                             alignment: .leading)
+                .frame(width: relative(84), height: relative(48))
+
+              row3_1(relative(48))
+              row3_2(relative(48))
+              RegularKeyIcon(letters: ["*", "@"],
                              width: relative(48), height: relative(48))
                 .frame(width: relative(48), height: relative(48))
             }
+          }
+          EnterKey(width: relative(48),
+                   height: relative(48) + relative(48) + relative(8))
+            .offset(CGSize(width: relative(-2),
+                           height: relative(1)))
+        }
 
-            ModifierKeyIcon(key: .shift, alignment: .bottomTrailing)
-              .frame(width: relative(48) + relative(48) + relative(16),
-                     height: relative(48))
+        HStack(spacing: relative(8)) {
+          ModifierKeyIcon(key: .shift)
+            .frame(width: relative(68), height: relative(48))
+
+          row4_1(relative(48))
+          row4_2(relative(48))
+
+          ModifierKeyIcon(key: .shift, alignment: .bottomTrailing)
+            .frame(width: relative(48) + relative(48) + relative(16),
+                   height: relative(48))
+        }
+
+        HStack(spacing: relative(8)) {
+          ModifierKeyIcon(key: .function)
+            .frame(width: relative(48), height: relative(48))
+          ModifierKeyIcon(key: .control)
+            .frame(width: relative(48), height: relative(48))
+          ModifierKeyIcon(key: .option)
+            .frame(width: relative(48), height: relative(48))
+          ModifierKeyIcon(key: .command)
+            .frame(width: relative(64), height: relative(48))
+
+          RegularKeyIcon(letter: "",
+                         height: relative(48))
+            .frame(width: width * 0.33, height: relative(48))
+
+          ModifierKeyIcon(key: .command, alignment: .topLeading)
+            .frame(width: relative(64), height: relative(48))
+          ModifierKeyIcon(key: .option, alignment: .topLeading)
+            .frame(width: relative(48), height: relative(48))
+
+          VStack(spacing: 0) {
+            Spacer().frame(width: relative(48),
+                           height: relative(24))
+            RegularKeyIcon(letter: "◀︎",
+                           width: relative(48),
+                           height: relative(24))
+              .frame(width: relative(48), height: relative(24))
+          }.frame(width: relative(48), height: relative(48))
+
+          VStack(spacing: 0) {
+            RegularKeyIcon(letter: "▲",
+                           width: relative(48),
+                           height: relative(24))
+              .frame(width: relative(48), height: relative(24))
+            RegularKeyIcon(letter: "▼",
+                           width: relative(48),
+                           height: relative(24))
+              .frame(width: relative(48), height: relative(24))
           }
 
-          HStack(spacing: relative(8)) {
-            ModifierKeyIcon(key: .function)
-              .frame(width: relative(48), height: relative(48))
-            ModifierKeyIcon(key: .control)
-              .frame(width: relative(48), height: relative(48))
-            ModifierKeyIcon(key: .option)
-              .frame(width: relative(48), height: relative(48))
-            ModifierKeyIcon(key: .command)
-              .frame(width: relative(64), height: relative(48))
-
-            RegularKeyIcon(letter: "",
-                           height: relative(48))
-              .frame(width: width * 0.33, height: relative(48))
-
-            ModifierKeyIcon(key: .command, alignment: .topLeading)
-              .frame(width: relative(64), height: relative(48))
-            ModifierKeyIcon(key: .option, alignment: .topLeading)
-              .frame(width: relative(48), height: relative(48))
-
-            VStack(spacing: 0) {
-              Spacer().frame(width: relative(48),
-                             height: relative(24))
-              RegularKeyIcon(letter: "◀︎",
-                             width: relative(48),
-                             height: relative(24))
-                .frame(width: relative(48), height: relative(24))
-            }.frame(width: relative(48), height: relative(64))
-
-            VStack(spacing: 0) {
-              RegularKeyIcon(letter: "▲",
-                             width: relative(48),
-                             height: relative(24))
-                .frame(width: relative(48), height: relative(24))
-              RegularKeyIcon(letter: "▼",
-                             width: relative(48),
-                             height: relative(24))
-                .frame(width: relative(48), height: relative(24))
-            }
-
-            VStack(spacing: 0) {
-              Spacer().frame(height: relative(24))
-              RegularKeyIcon(letter: "►",
-                             width: relative(48),
-                             height: relative(24))
-                .frame(width: relative(48), height: relative(24))
-            }.frame(width: relative(48), height: relative(64))
-          }
+          VStack(spacing: 0) {
+            Spacer().frame(height: relative(24))
+            RegularKeyIcon(letter: "►",
+                           width: relative(48),
+                           height: relative(24))
+              .frame(width: relative(48), height: relative(24))
+          }.frame(width: relative(48), height: relative(48))
         }
       }
-      .padding(relative(16))
+    }
+    .padding(relative(16))
   }
 
   func relative(_ number: CGFloat) -> CGFloat {
@@ -174,10 +251,13 @@ struct KeyboardView_Previews: PreviewProvider, TestPreviewProvider {
 
   static var testPreview: some View {
     Group {
-      KeyboardView(width: 320).previewDisplayName("320")
-      KeyboardView(width: 640).previewDisplayName("640")
-      KeyboardView(width: 800).previewDisplayName("800")
-      KeyboardView(width: 1024).previewDisplayName("1024")
+//      KeyboardView(width: 320).previewDisplayName("320")
+//      KeyboardView(width: 640).previewDisplayName("640")
+      KeyboardView(width: 800)
+        .previewDisplayName("800")
+        .rotation3DEffect(.degrees(50), axis: (x: 1, y: 0, z: 0))
+        .frame(width: 1024)
+//      KeyboardView(width: 1024).previewDisplayName("1024")
     }
   }
 }

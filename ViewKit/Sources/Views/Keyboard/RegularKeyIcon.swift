@@ -109,6 +109,7 @@ public struct RegularKeyIcon: View, KeyView {
 //          .padding(.horizontal, height * 0.2)
       }
     }
+//    .frame(height: height)
   }
 }
 
