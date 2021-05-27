@@ -12,6 +12,11 @@ public extension View {
   }
 
   @ViewBuilder
+  func transform<Transform: View>(_ transform: (Self) -> Transform ) -> some View {
+    transform(self)
+  }
+
+  @ViewBuilder
   func `if`<Transform: View>(
     _ condition: Bool,
     transform: (Self) -> Transform
