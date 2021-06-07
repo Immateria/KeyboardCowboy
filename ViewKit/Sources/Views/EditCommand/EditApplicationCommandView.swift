@@ -10,9 +10,7 @@ public enum OpenPanelAction {
 struct EditApplicationCommandView: View {
   @State private var selection: Int = 0
   @State var command: ApplicationCommand {
-    willSet {
-      update(newValue)
-    }
+    willSet { update(newValue) }
   }
   var installedApplications: [Application]
   var update: (ApplicationCommand) -> Void

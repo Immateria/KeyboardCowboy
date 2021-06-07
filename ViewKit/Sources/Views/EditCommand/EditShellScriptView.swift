@@ -2,15 +2,20 @@ import SwiftUI
 import ModelKit
 
 struct EditShellScriptView: View {
-  @Binding var command: ScriptCommand
+  @State var command: ScriptCommand {
+    willSet { update(newValue) }
+  }
   @State var filePath: String
   let openPanelController: OpenPanelController
+  var update: (ScriptCommand) -> Void
 
-  init(command: Binding<ScriptCommand>,
-       openPanelController: OpenPanelController) {
-    _command = command
-    _filePath = State(initialValue: command.wrappedValue.path)
+  init(command: ScriptCommand,
+       openPanelController: OpenPanelController,
+       update: @escaping (ScriptCommand) -> Void) {
+    self._command = State(initialValue: command)
+    _filePath = State(initialValue: command.path)
     self.openPanelController = openPanelController
+    self.update = update
   }
 
   var body: some View {
@@ -67,7 +72,7 @@ struct EditShellScriptView_Previews: PreviewProvider, TestPreviewProvider {
 
   static var testPreview: some View {
     EditShellScriptView(
-      command: .constant(ScriptCommand.empty(.shell)),
-      openPanelController: OpenPanelPreviewController().erase())
+      command: ScriptCommand.empty(.shell),
+      openPanelController: OpenPanelPreviewController().erase()) { _ in }
   }
 }

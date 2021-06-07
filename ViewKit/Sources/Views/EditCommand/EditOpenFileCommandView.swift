@@ -4,22 +4,26 @@ import ModelKit
 
 struct EditOpenFileCommandView: View {
   @State private var applicationIdentifier: String = ""
-  @Binding var command: OpenCommand
+  @State var command: OpenCommand {
+    willSet { update(newValue) }
+  }
   @State var filePath: String
   private let openPanelController: OpenPanelController
   private var installedApplications: [Application]
   private var noApplication: Application = Application.empty()
+  private var update: (OpenCommand) -> Void
 
-  init(command: Binding<OpenCommand>,
+  init(command: OpenCommand,
        openPanelController: OpenPanelController,
-       installedApplications: [Application]) {
-    _command = command
-    _filePath = State(initialValue: command.wrappedValue.path)
+       installedApplications: [Application],
+       update: @escaping (OpenCommand) -> Void) {
+    self._command = State(initialValue: command)
+    self._filePath = State(initialValue: command.path)
     self.openPanelController = openPanelController
-
     var installedApplications = installedApplications
     installedApplications.insert(noApplication, at: 0)
     self.installedApplications = installedApplications
+    self.update = update
   }
 
   var body: some View {
@@ -103,8 +107,8 @@ struct EditOpenFileCommandView_Previews: PreviewProvider, TestPreviewProvider {
 
   static var testPreview: some View {
     EditOpenFileCommandView(
-      command: .constant(OpenCommand(path: "")),
+      command: OpenCommand(path: ""),
       openPanelController: OpenPanelPreviewController().erase(),
-      installedApplications: ModelFactory().installedApplications())
+      installedApplications: ModelFactory().installedApplications()) { _ in}
   }
 }

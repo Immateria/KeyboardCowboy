@@ -78,41 +78,33 @@ private extension EditCommandView {
         }
       case .script(let kind):
         switch kind {
-        case .appleScript:
+        case .appleScript(let id, let name, let source):
           EditAppleScriptView(
-            command: Binding(
-              get: { kind },
-              set: { scriptCommand in
-                self.command = .script(scriptCommand)
-              }),
-            openPanelController: openPanelController)
-        case .shell:
+            command: ScriptCommand.appleScript(id: id, name: name, source: source),
+            openPanelController: openPanelController) { scriptCommand in
+            self.command = .script(scriptCommand)
+          }
+        case .shell(let id, let name, let source):
           EditShellScriptView(
-            command: Binding(
-              get: { kind },
-              set: { scriptCommand in
-                self.command = .script(scriptCommand)
-              }),
-            openPanelController: openPanelController)
+            command: ScriptCommand.shell(id: id, name: name, source: source),
+          openPanelController: openPanelController) { scriptCommand in
+            self.command = .script(scriptCommand)
+          }
         }
       case .open(let command):
         if command.isUrl {
           EditOpenURLCommandView(
-            command: Binding(
-              get: { command },
-              set: { openCommand in
-                self.command = .open(openCommand)
-              }),
-            installedApplications: applicationProvider.state)
+            command: command,
+            installedApplications: applicationProvider.state) { openCommand in
+            self.command = .open(openCommand)
+          }
         } else {
           EditOpenFileCommandView(
-            command: Binding(
-              get: { command },
-              set: { openCommand in
-                self.command = .open(openCommand)
-              }),
+            command: command,
             openPanelController: openPanelController,
-            installedApplications: applicationProvider.state)
+            installedApplications: applicationProvider.state) { openCommand in
+            self.command = .open(openCommand)
+          }
         }
         EmptyView()
       case .keyboard(let command):
@@ -160,6 +152,10 @@ private extension EditCommandView {
         Text("OK").frame(minWidth: 60)
       }).keyboardShortcut(.defaultAction)
     }
+  }
+
+  private func receive(_ command: Command) {
+    self.command = command
   }
 }
 

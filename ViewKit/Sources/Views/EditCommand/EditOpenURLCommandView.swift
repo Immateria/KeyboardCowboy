@@ -5,15 +5,20 @@ import ModelKit
 struct EditOpenURLCommandView: View {
   @State private var applicationIdentifier: String = ""
   @State var url: String = ""
-  @Binding var command: OpenCommand
+  @State var command: OpenCommand {
+    willSet { update(newValue) }
+  }
   var installedApplications: [Application]
   private var noApplication: Application = Application.empty()
+  var update: (OpenCommand) -> Void
 
-  init(command: Binding<OpenCommand>, installedApplications: [Application]) {
-    _command = command
+  init(command: OpenCommand, installedApplications: [Application],
+       update: @escaping (OpenCommand) -> Void) {
+    self._command = State(initialValue: command)
     var installedApplications = installedApplications
     installedApplications.insert(noApplication, at: 0)
     self.installedApplications = installedApplications
+    self.update = update
   }
 
   var body: some View {
@@ -89,8 +94,9 @@ struct EditOpenURLCommandView_Previews: PreviewProvider, TestPreviewProvider {
 
   static var testPreview: some View {
     EditOpenURLCommandView(
-      command: .constant(OpenCommand.empty()),
-      installedApplications: ModelFactory().installedApplications()
+      command: OpenCommand.empty(),
+      installedApplications: ModelFactory().installedApplications(),
+      update: { _ in }
     )
   }
 }
