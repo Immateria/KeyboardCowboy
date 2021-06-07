@@ -1,82 +1,111 @@
 @testable import Keyboard_Cowboy
 @testable import ViewKit
+import ModelKit
 import Cocoa
 import Foundation
 import SwiftUI
 import XCTest
 
-class GenerateAssets: XCTestCase {
-  func testGenerateKeyboardSettingsIcon() throws {
-    wait(for: [
-      Generator.execute(CommandKeyIcon().preferredColorScheme(.light), name: "KeyboardSettings-Light", size: CGSize(width: 48, height: 48)),
-      Generator.execute(CommandKeyIcon().preferredColorScheme(.light), name: "KeyboardSettings-Light@2x", size: CGSize(width: 96, height: 96)),
+private extension ColorScheme {
+  var name: String {
+    switch self {
+    case .dark:
+      return "Dark"
+    case .light:
+      return "Light"
+    @unknown default:
+      fatalError("Unsupported color scheme")
+    }
+  }
+}
 
-      Generator.execute(CommandKeyIcon().preferredColorScheme(.dark), name: "KeyboardSettings-Dark", size: CGSize(width: 48, height: 48)),
-      Generator.execute(CommandKeyIcon().preferredColorScheme(.dark), name: "KeyboardSettings-Dark@2x", size: CGSize(width: 96, height: 96)),
-    ], timeout: 10)
+class GenerateAssets: XCTestCase {
+  private func iterate(_ handler: (Int, ColorScheme, String) -> Void) {
+    for colorScheme in ColorScheme.allCases {
+      for x in 1...2 {
+        handler(x, colorScheme, x > 1 ? "@2x" : "")
+      }
+    }
+  }
+
+  func testGenerateKeyboardSettingsIcon() throws {
+    var expectations = [XCTestExpectation]()
+
+    iterate { x, colorScheme, suffix in
+      let size: CGFloat = 48 * CGFloat(x)
+      let name = "KeyboardSettings-\(colorScheme.name)\(suffix)"
+      let view = CommandKeyIcon().preferredColorScheme(colorScheme).frame(height: size)
+      expectations.append(Generator.execute(view, name: name, size: CGSize(width: size, height: size)))
+    }
+
+    wait(for: expectations, timeout: 10.0)
   }
 
   func testGenerateKeyboardImage() {
-    wait(for: [
-      Generator.execute(KeyboardView(width: 400)
-                          .rotation3DEffect(.degrees(50), axis: (x: 1, y: 0, z: 0))
-                          .frame(width: 512, height: 150, alignment: .center)
-                          .preferredColorScheme(.dark)
-                        ,
-                        name: "Keyboard-Dark",
-                        size: CGSize(width: 512, height: 150)),
-      Generator.execute(KeyboardView(width: 800)
-                          .rotation3DEffect(.degrees(50), axis: (x: 1, y: 0, z: 0))
-                          .frame(width: 1024, height: 300, alignment: .center)
-                          .preferredColorScheme(.dark),
-                        name: "Keyboard-Dark@2x",
-                        size: CGSize(width: 1024, height: 300)),
+    var expectations = [XCTestExpectation]()
 
-      Generator.execute(KeyboardView(width: 400)
-                          .rotation3DEffect(.degrees(50), axis: (x: 1, y: 0, z: 0))
-                          .frame(width: 512, height: 150, alignment: .center)
-                          .preferredColorScheme(.light)
-                        ,
-                        name: "Keyboard-Light",
-                        size: CGSize(width: 512, height: 150)),
-      Generator.execute(KeyboardView(width: 800)
-                          .rotation3DEffect(.degrees(50), axis: (x: 1, y: 0, z: 0))
-                          .frame(width: 1024, height: 300, alignment: .center)
-                          .preferredColorScheme(.light),
-                        name: "Keyboard-Light@2x",
-                        size: CGSize(width: 1024, height: 300))
-    ], timeout: 10)
+    iterate { x, colorScheme, suffix in
+      let size = CGSize(width: 512 * CGFloat(x), height: 150 * CGFloat(x))
+      expectations.append(
+        Generator.execute(KeyboardView(width: 400 * CGFloat(x))
+                            .rotation3DEffect(.degrees(50), axis: (x: 1, y: 0, z: 0))
+                            .frame(width: size.width, height: size.height,
+                                   alignment: .center)
+                            .preferredColorScheme(colorScheme),
+                          name: "Keyboard-\(colorScheme.name)\(suffix)",
+                          size: size)
+        )
+    }
+
+    wait(for: expectations, timeout: 10.0)
   }
 
   func testGenerateMenubarIcons() {
-    wait(for: [
-      Generator.execute(MenubarIcon(color: Color(.textColor), size: CGSize(width: 11, height: 11)).preferredColorScheme(.light),
-                        name: "MenubarIcon-Light",
-                        size: CGSize(width: 11, height: 11)),
-      Generator.execute(MenubarIcon(color: Color(.textColor), size: CGSize(width: 22, height: 22)).preferredColorScheme(.light),
-                        name: "MenubarIcon-Light@2x",
-                        size: CGSize(width: 22, height: 22)),
+    var expectations = [XCTestExpectation]()
 
-      Generator.execute(MenubarIcon(color: Color(.textColor), size: CGSize(width: 11, height: 11)).preferredColorScheme(.dark),
-                        name: "MenubarIcon-Dark",
-                        size: CGSize(width: 11, height: 11)),
-      Generator.execute(MenubarIcon(color: Color(.textColor), size: CGSize(width: 22, height: 22)).preferredColorScheme(.dark),
-                        name: "MenubarIcon-Dark@2x",
-                        size: CGSize(width: 22, height: 22)),
+    iterate { x, colorScheme, suffix in
+      let size = CGSize(width: 11 * CGFloat(x), height: 11 * CGFloat(x))
+      expectations.append(contentsOf: [
+        Generator.execute(
+          MenubarIcon(color: Color(.textColor), size: size).preferredColorScheme(colorScheme),
+          name: "MenubarIcon-\(colorScheme)\(suffix)",
+          size: size),
 
-      Generator.execute(MenubarIcon(color: Color.accentColor, size: CGSize(width: 11, height: 11)).preferredColorScheme(.light),
-                        name: "MenubarIcon-Light-Active",
-                        size: CGSize(width: 11, height: 11)),
-      Generator.execute(MenubarIcon(color: Color.accentColor, size: CGSize(width: 22, height: 22)).preferredColorScheme(.light),
-                        name: "MenubarIcon-Light-Active@2x",
-                        size: CGSize(width: 22, height: 22)),
+        Generator.execute(
+          MenubarIcon(color: Color.accentColor, size: size).preferredColorScheme(colorScheme),
+          name: "MenubarIcon-\(colorScheme)-Active\(suffix)",
+          size: size)
+      ])
+    }
 
-      Generator.execute(MenubarIcon(color: Color.accentColor, size: CGSize(width: 11, height: 11)).preferredColorScheme(.dark),
-                        name: "MenubarIcon-Dark-Active",
-                        size: CGSize(width: 11, height: 11)),
-      Generator.execute(MenubarIcon(color: Color.accentColor, size: CGSize(width: 22, height: 22)).preferredColorScheme(.dark),
-                        name: "MenubarIcon-Dark-Active@2x",
-                        size: CGSize(width: 22, height: 22)),
-    ], timeout: 10)
+    wait(for: expectations, timeout: 10.0)
+  }
+
+  func testGenerateKeyboardShortcutAsset() {
+    var expectations = [XCTestExpectation]()
+
+    iterate { x, colorScheme, suffix in
+
+      let hudProvider = HUDPreviewProvider()
+      hudProvider.state = [
+        ModelKit.KeyboardShortcut(key: "A", modifiers: [.function, .shift]),
+        ModelKit.KeyboardShortcut(key: "F", modifiers: []),
+        ModelKit.KeyboardShortcut(key: "Open Terminal", modifiers: [])
+      ]
+
+      let size = CGSize(width: 500 * CGFloat(x),
+                        height: 500 * CGFloat(x))
+      let view = HUDStack(hudProvider: hudProvider.erase(),
+                          height: 32 * CGFloat(x))
+        .preferredColorScheme(colorScheme)
+
+      expectations.append(
+        Generator.execute(view,
+                          name: "KeyboardShortcuts-\(colorScheme.name)\(suffix)",
+                          size: size)
+      )
+    }
+
+    wait(for: expectations, timeout: 10.0)
   }
 }

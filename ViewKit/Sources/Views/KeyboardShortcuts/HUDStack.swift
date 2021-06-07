@@ -5,11 +5,16 @@ public struct HUDStack: View {
   public weak var window: NSWindow?
   @ObservedObject var hudProvider: HUDProvider
 
-  private let animation = Animation
-    .easeOut(duration: 0.33)
+  private let animation = Animation.easeOut(duration: 0.33)
+  private let height: CGFloat
+  private let fontSize: CGFloat
+  private let modifierHeight: CGFloat
 
-  public init(hudProvider: HUDProvider) {
-    _hudProvider = ObservedObject(wrappedValue: hudProvider)
+  public init(hudProvider: HUDProvider, height: CGFloat = 32) {
+    self._hudProvider = ObservedObject(wrappedValue: hudProvider)
+    self.height = height
+    self.fontSize = height * 0.5
+    self.modifierHeight = height * 1.5
   }
 
   public var body: some View {
@@ -23,13 +28,13 @@ public struct HUDStack: View {
                 Spacer().frame(width: 2)
                 Text("+")
                   .foregroundColor(Color(.textColor).opacity(0.5))
-                  .font(Font.system(size: 12, weight: .regular, design: .rounded))
+                  .font(Font.system(size: fontSize, weight: .regular, design: .rounded))
                 Spacer().frame(width: 2)
               } else if hudProvider.state.last == keyboardShortcut {
                 Spacer().frame(width: 2)
                 Text("=")
                   .foregroundColor(Color(.textColor).opacity(0.5))
-                  .font(Font.system(size: 12, weight: .regular, design: .rounded))
+                  .font(Font.system(size: fontSize, weight: .regular, design: .rounded))
                 Spacer().frame(width: 2)
               }
 
@@ -38,11 +43,15 @@ public struct HUDStack: View {
                  !modifiers.isEmpty {
                 ForEach(modifiers) { modifier in
                   ModifierKeyIcon(key: modifier)
-                    .frame(minWidth: modifier == .shift || modifier == .command ? 48 : 32, maxWidth: 48)
+                    .frame(minWidth: modifier == .shift || modifier == .command
+                            ? modifierHeight : height,
+                           maxWidth: modifierHeight)
                 }
               }
 
-              RegularKeyIcon(letter: "\(keyboardShortcut.key)",
+              RegularKeyIcon(letter: "  \(keyboardShortcut.key)  ",
+                             width: height,
+                             height: height,
                              glow: hudProvider.state.last == keyboardShortcut)
                 .shadow(color: Color(.shadowColor).opacity(0.15), radius: 3, x: 0, y: 1)
               }
@@ -56,7 +65,7 @@ public struct HUDStack: View {
           }
         }
       }
-      .frame(height: 32)
+      .frame(height: height)
       .padding(.vertical, 4)
       .padding(.horizontal, 2)
       .shadow(radius: 1, y: 2)
@@ -69,9 +78,14 @@ public struct HUDStack: View {
   }
 }
 
-struct HUDStack_Previews: PreviewProvider {
+struct HUDStack_Previews: PreviewProvider, TestPreviewProvider {
   static var previews: some View {
-    HUDStack(hudProvider: HUDPreviewProvider().erase())
+    testPreview.previewAllColorSchemes()
+  }
+
+  static var testPreview: some View {
+    HUDStack(hudProvider: HUDPreviewProvider().erase(),
+             height: 32)
       .frame(width: 600)
   }
 }

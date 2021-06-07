@@ -6,14 +6,15 @@ import XCTest
 class Generator {
   static func execute<Content: View>(_ rootView: Content,
                                      name: String,
-                                     size: CGSize) -> XCTestExpectation {
+                                     size: CGSize? = nil) -> XCTestExpectation {
     let viewController = NSHostingController(rootView: rootView)
-    viewController.view.frame.size = size
-    let window = FloatingWindow(contentRect: .init(origin: .zero, size: size))
+    let window = FloatingWindow(contentRect: .init(origin: .zero, size: size ?? .zero))
     let windowController = NSWindowController(window: window)
-    viewController.view.frame = CGRect(origin: .zero, size: size)
+    viewController.view.frame = CGRect(origin: .zero, size: size ?? .zero)
     windowController.contentViewController = viewController
-    window.minSize = size
+    if let size = size {
+      window.minSize = size
+    }
     windowController.showWindow(nil)
 
     let expectation = XCTestExpectation(description: "Wait for expectation")

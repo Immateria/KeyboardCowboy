@@ -143,7 +143,7 @@ struct KeyboardView: View {
         HStack(alignment: .top, spacing: 0) {
           VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: relative(8)) {
-              RegularKeyIcon(letters: [" ", "⇥"],
+              RegularKeyIcon(letters: [" ", "  ⇥"],
                              width: relative(60),
                              height: relative(48),
                              alignment: .bottomLeading)
@@ -155,7 +155,7 @@ struct KeyboardView: View {
             Spacer().frame(height: relative(8))
 
             HStack(spacing: relative(8)) {
-              RegularKeyIcon(letters: ["∘", "⇪"],
+              RegularKeyIcon(letters: [" ∘", " ⇪"],
                              width: relative(72),
                              height: relative(48),
                              alignment: .leading)
@@ -255,8 +255,6 @@ struct KeyboardView_Previews: PreviewProvider, TestPreviewProvider {
 //      KeyboardView(width: 640).previewDisplayName("640")
       KeyboardView(width: 800)
         .previewDisplayName("800")
-        .rotation3DEffect(.degrees(50), axis: (x: 1, y: 0, z: 0))
-        .frame(width: 1024)
 //      KeyboardView(width: 1024).previewDisplayName("1024")
     }
   }

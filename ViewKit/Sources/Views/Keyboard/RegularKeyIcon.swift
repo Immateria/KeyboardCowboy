@@ -71,18 +71,16 @@ public struct RegularKeyIcon: View, KeyView {
   }
 
   public var body: some View {
-    ZStack {
-      keyBackgroundView(height)
-        .foregroundColor(Color(.textColor).opacity(0.66))
-      letter(height: height)
-        .fixedSize(horizontal: true, vertical: true)
-        .frame(minWidth: width, minHeight: height, alignment: alignment)
-    }
-    .onAppear {
-      if glow {
-        withAnimation(animation, { glow.toggle() })
+    letter(height: height)
+      .fixedSize(horizontal: true, vertical: true)
+      .frame(minWidth: width, maxWidth: .infinity, alignment: alignment)
+      .background(keyBackgroundView(height)
+                    .foregroundColor(Color(.textColor).opacity(0.66)))
+      .onAppear {
+        if glow {
+          withAnimation(animation, { glow.toggle() })
+        }
       }
-    }
   }
 
   func letter(height: CGFloat) -> some View {
@@ -106,10 +104,9 @@ public struct RegularKeyIcon: View, KeyView {
                   radius: 1,
                   y: glow ? 0 : 2
           )
-//          .padding(.horizontal, height * 0.2)
       }
     }
-//    .frame(height: height)
+    .frame(height: height)
   }
 }
 
