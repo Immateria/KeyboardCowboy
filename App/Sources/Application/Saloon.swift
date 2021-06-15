@@ -267,11 +267,12 @@ class Saloon: ViewKitStore, MenubarControllerDelegate {
       }.store(in: &subscriptions)
 
     context.groups.subject
+      .dropFirst()
       .debounce(for: 1.0, scheduler: RunLoop.current)
       .removeDuplicates()
       .receive(on: DispatchQueue.global(qos: .userInitiated))
       .sink { groups in
-        self.applicationTrigger?.recieve(groups)
+        self.applicationTrigger?.receive(groups)
         self.saveGroupsToDisk(groups)
       }
       .store(in: &subscriptions)

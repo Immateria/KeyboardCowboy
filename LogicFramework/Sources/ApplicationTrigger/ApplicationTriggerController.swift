@@ -13,7 +13,7 @@ public protocol ApplicationTriggerControlling: AnyObject {
        workspace: NSWorkspace,
        runningTests: Bool)
 
-  func recieve(_ groups: [Group])
+  func receive(_ groups: [Group])
 }
 
 public class ApplicationTriggerController: ApplicationTriggerControlling {
@@ -46,7 +46,11 @@ public class ApplicationTriggerController: ApplicationTriggerControlling {
 
   // MARK: Public methods
 
-  public func recieve(_ groups: [Group]) {
+  public func receive(_ groups: [Group]) {
+    self.openActions.removeAll()
+    self.closeActions.removeAll()
+    self.activateActions.removeAll()
+
     let workflows = groups.flatMap({ $0.workflows })
     for workflow in workflows where workflow.isEnabled {
       switch workflow.trigger {
