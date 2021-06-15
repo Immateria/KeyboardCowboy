@@ -53,10 +53,10 @@ public func keyboardShortcut<Sender>(
   modifiers: EventModifiers = .none,
   fallbackEvent: @escaping () -> Void
 ) -> some View where Sender: Subject, Sender.Output == KeyEquivalent {
-  return AnyView(keyboardShortcut(key, name: name, sender: sender, modifiers: modifiers,
+  return keyboardShortcut(key, name: name, sender: sender, modifiers: modifiers,
                                   fallbackEvent: fallbackEvent) {
     Text("\(name)")
-  })
+  }
 }
 
 extension KeyEquivalent: Equatable {

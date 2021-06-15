@@ -63,24 +63,21 @@ private extension GroupListView {
     }
   }
 
-  var overlay: AnyView {
+  @ViewBuilder
+  var overlay: some View {
     if let bundleIdentifier = bundleIdentifier,
        let applicationIcon = IconController.shared.createIconView(bundleIdentifier) {
-      return AnyView(
-        applicationIcon
+      applicationIcon
           .accentColor(.gray)
           .frame(width: 30, height: 30, alignment: .center)
           .clipped()
-      )
     } else {
-      return AnyView(Image(systemName: config.symbol)
+      Image(systemName: config.symbol)
                       .resizable()
                       .renderingMode(.template)
                       .aspectRatio(contentMode: .fill)
                       .foregroundColor(.white)
                       .frame(width: 12, height: 12, alignment: .center)
-      )
-
     }
   }
 
