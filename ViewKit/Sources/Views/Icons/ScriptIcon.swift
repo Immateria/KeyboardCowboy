@@ -10,25 +10,22 @@ struct ScriptIcon: View {
   var body: some View {
     GeometryReader { proxy in
       ZStack(alignment: .topLeading) {
+        RoundedRectangle(cornerRadius: cornerRadius)
+          .stroke(Color.white)
         Rectangle()
-          .fill(Color.gray)
-          .cornerRadius(cornerRadius + 1)
-        Rectangle()
-          .fill(Color.black)
+          .fill(Color.clear)
           .cornerRadius(cornerRadius)
           .padding(1)
-//          .shadow(radius: 1, y: 2)
+          .shadow(radius: 1, y: 2)
         Text(">_")
           .font(Font.custom(
                   "Menlo",
-                  fixedSize: proxy.size.width * 0.20))
-          .foregroundColor(.accentColor)
+                  fixedSize: proxy.size.width * 0.30))
+          .foregroundColor(.white)
           .offset(x: proxy.size.width * 0.1,
                   y: proxy.size.height * 0.1)
       }
-//      .shadow(radius: 2, y: 2)
-      .padding([.leading, .trailing], proxy.size.width * 0.075 )
-      .padding([.top, .bottom], proxy.size.width * 0.095)
+      .shadow(radius: 2, y: 2)
     }
   }
 }
