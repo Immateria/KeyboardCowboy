@@ -1,35 +1,36 @@
 import SwiftUI
 
 struct TrafficSymbol: View {
-    var body: some View {
-      ZStack {
-        GeometryReader { proxy in
-          RegularKeyIcon(letter: "", height: proxy.size.height * 0.6)
-            .colorScheme(.dark)
-            .frame(width: proxy.size.width, height: proxy.size.height)
-        }
+  private let lineWidth: CGFloat = 0.5
+  let foreground: Color
 
-        HStack(spacing: 4) {
-          Circle()
-            .fill(Color.red)
-            .background(Circle().stroke(Color(.shadowColor)))
-          Circle()
-            .fill(Color.yellow)
-            .background(Circle().stroke(Color(.shadowColor)))
-          Circle()
-            .fill(Color.green)
-            .background(Circle().stroke(Color(.shadowColor)))
-        }.padding(.horizontal, 3)
-      }
+  var body: some View {
+    ZStack {
+      RoundedRectangle(cornerRadius: 4)
+        .fill(Color.white)
+        .padding(.vertical, 6)
+
+      HStack(spacing: 4) {
+        Circle()
+          .fill(Color.clear)
+          .background(Circle().fill(foreground).opacity(0.25))
+        Circle()
+          .fill(Color.clear)
+          .background(Circle().fill(foreground).opacity(0.5))
+        Circle()
+          .fill(Color.clear)
+          .background(Circle().fill(foreground).opacity(0.75))
+      }.padding(.horizontal, 3)
     }
+  }
 }
 
 struct TrafficSymbol_Previews: PreviewProvider {
   static var previews: some View {
     testPreview.previewAllColorSchemes()
   }
-
+  
   static var testPreview: some View {
-        TrafficSymbol()
-    }
+    TrafficSymbol(foreground: Color.accentColor)
+  }
 }

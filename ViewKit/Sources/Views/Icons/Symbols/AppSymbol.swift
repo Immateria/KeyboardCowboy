@@ -9,22 +9,8 @@ struct AppSymbol: View {
   var body: some View {
     ZStack {
       appOutline()
-        .background(Color.pink)
         .cornerRadius(8.0)
-        .rotationEffect(.degrees(-30))
-        .offset(x: -4, y: -1)
-
-      appOutline()
-        .background(RegularKeyIcon(letter: "").colorScheme(colorScheme))
-        .cornerRadius(8.0)
-        .rotationEffect(.degrees(-10))
-        .offset(x: -1, y: -1)
-
-      appOutline()
-        .background(RegularKeyIcon(letter: "").colorScheme(invertedColorScheme))
-        .cornerRadius(8.0)
-        .rotationEffect(.degrees(10))
-        .offset(x: 4, y: 4)
+        .padding()
     }
   }
 
@@ -32,7 +18,7 @@ struct AppSymbol: View {
   func appOutline() -> some View {
     ZStack {
       RoundedRectangle(cornerRadius: 8)
-        .stroke(Color(.textBackgroundColor))
+        .stroke(Color(.white))
 
       GeometryReader { proxy in
         // Horizontal lines
@@ -41,31 +27,31 @@ struct AppSymbol: View {
           path.move(to: CGPoint(x: 2, y: 2))
           path.addLine(to: CGPoint(x: proxy.size.width - 2,
                                    y: proxy.size.height - 2))
-        }.stroke(Color(.textBackgroundColor).opacity(0.4), lineWidth: 0.25)
+        }.stroke(Color(.white).opacity(0.6), lineWidth: 0.5)
 
         Path { path in
           path.move(to: CGPoint(x: 2, y: proxy.size.width - 2))
           path.addLine(to: CGPoint(x: proxy.size.width - 2,
                                    y: 2))
-        }.stroke(Color(.textBackgroundColor).opacity(0.4), lineWidth: 0.25)
+        }.stroke(Color(.white).opacity(0.6), lineWidth: 0.5)
 
         Path { path in
           path.move(to: CGPoint(x: 0, y: proxy.size.height * 0.25))
           path.addLine(to: CGPoint(x: proxy.size.width,
                                    y: proxy.size.height * 0.25))
-        }.stroke(Color(.textBackgroundColor).opacity(0.4), lineWidth: 0.25)
+        }.stroke(Color(.white).opacity(0.6), lineWidth: 0.5)
 
         Path { path in
           path.move(to: CGPoint(x: 0, y: proxy.size.height * 0.5))
           path.addLine(to: CGPoint(x: proxy.size.width,
                                    y: proxy.size.height * 0.5))
-        }.stroke(Color(.textBackgroundColor).opacity(0.4), lineWidth: 0.25)
+        }.stroke(Color(.white).opacity(0.6), lineWidth: 0.5)
 
         Path { path in
           path.move(to: CGPoint(x: 0, y: proxy.size.height * 0.75))
           path.addLine(to: CGPoint(x: proxy.size.width,
                                    y: proxy.size.height * 0.75))
-        }.stroke(Color(.textBackgroundColor).opacity(0.4), lineWidth: 0.25)
+        }.stroke(Color(.white).opacity(0.6), lineWidth: 0.5)
 
         // Vertical lines
 
@@ -73,35 +59,33 @@ struct AppSymbol: View {
           path.move(to: CGPoint(x: proxy.size.height * 0.25, y: 2))
           path.addLine(to: CGPoint(x: proxy.size.height * 0.25,
                                    y: proxy.size.height))
-        }.stroke(Color(.textBackgroundColor).opacity(0.4), lineWidth: 0.25)
+        }.stroke(Color(.white).opacity(0.6), lineWidth: 0.5)
 
         Path { path in
           path.move(to: CGPoint(x: proxy.size.height * 0.5, y: 2))
           path.addLine(to: CGPoint(x: proxy.size.height * 0.5,
                                    y: proxy.size.height))
-        }.stroke(Color(.textBackgroundColor).opacity(0.4), lineWidth: 0.25)
+        }.stroke(Color(.white).opacity(0.6), lineWidth: 0.5)
 
         Path { path in
           path.move(to: CGPoint(x: proxy.size.height * 0.75, y: 2))
           path.addLine(to: CGPoint(x: proxy.size.height * 0.75,
                                    y: proxy.size.height))
-        }.stroke(Color(.textBackgroundColor).opacity(0.4), lineWidth: 0.25)
-
-
+        }.stroke(Color(.white).opacity(0.6), lineWidth: 0.5)
       }
 
       Circle()
-        .stroke(Color(.textBackgroundColor), lineWidth: 0.25)
+        .stroke(Color(.white), lineWidth: 0.5)
         .frame(width: 30, height: 30)
         .opacity(0.6)
 
       Circle()
-        .stroke(Color(.textBackgroundColor), lineWidth: 0.25)
+        .stroke(Color(.white), lineWidth: 0.5)
         .frame(width: 24, height: 24)
         .opacity(0.4)
 
       Circle()
-        .stroke(Color(.textBackgroundColor), lineWidth: 0.25)
+        .stroke(Color(.white), lineWidth: 0.5)
         .frame(width: 12, height: 12)
         .opacity(0.4)
 

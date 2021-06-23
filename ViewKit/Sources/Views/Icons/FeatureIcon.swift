@@ -34,19 +34,29 @@ struct FeatureIcon_Previews: PreviewProvider {
 
   static var testPreview: some View {
     HStack {
-      FeatureIcon(color: .red, size: previewSize,
-                  { AppSymbol() })
-      FeatureIcon(color: .orange, size: previewSize,
-                  { TrafficSymbol() })
-      FeatureIcon(color: .yellow, size: previewSize,
-                  { ScriptIcon(cornerRadius: 3) })
-      FeatureIcon(color: .green, size: previewSize,
-                  { CommandKeyIcon() })
-      FeatureIcon(color: .blue, size: previewSize,
-                  { FolderIcon() })
-      FeatureIcon(color: .purple, size: previewSize,
-                  { URLIcon() })
-      FeatureIcon(color: .gray, size: previewSize, { Text("Groups") })
-    }
+      FeatureIcon(color: .red, size: previewSize, { AppSymbol() })
+      FeatureIcon(color: .orange, size: previewSize, {
+        TrafficSymbol(foreground: .orange)
+      })
+      FeatureIcon(color: .yellow, size: previewSize, {
+        ScriptSymbol(cornerRadius: 3,
+                     foreground: .yellow,
+                     background: .white.opacity(0.7),
+                     borderColor: .white)
+      })
+      FeatureIcon(color: .green, size: previewSize, {
+        CommandSymbolIcon(background: .white.opacity(0.85),
+                          textColor: Color.green)
+      })
+      FeatureIcon(color: .blue, size: previewSize, {
+        FolderSymbol(cornerRadius: 0.06, textColor: .blue)
+      })
+      FeatureIcon(color: .purple, size: previewSize, {
+        URLSymbol()
+      })
+      FeatureIcon(color: .gray, size: previewSize, {
+        GroupSymbol()
+      })
+    }.redacted(reason: .placeholder)
   }
 }
