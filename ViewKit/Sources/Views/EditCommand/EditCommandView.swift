@@ -170,14 +170,11 @@ private extension EditCommandView {
       }
       ))
     case .builtIn(let command):
-      EditBuiltInCommand(command: Binding(
-        get: { command },
-        set: { builtInCommand in
+      EditBuiltInCommand(command: command) { builtInCommand in
         let command: Command = .builtIn(builtInCommand)
         self.command = command
         self.selection = command
       }
-      ))
     case .none:
       Text("Pick a command type")
         .padding()

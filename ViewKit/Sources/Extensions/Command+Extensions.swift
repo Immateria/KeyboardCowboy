@@ -10,6 +10,8 @@ extension Command {
       switch command.kind {
       case .quickRun:
         return "ApplicationIcon"
+      case .repeatLastKeystroke:
+        return "ApplicationIcon"
       }
     case .script:
       return "/System/Applications/Utilities/Script Editor.app"

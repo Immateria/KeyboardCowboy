@@ -3,10 +3,16 @@ import ModelKit
 
 struct EditBuiltInCommand: View {
   @State private var selection: String = ""
-  @Binding var command: BuiltInCommand
+  @State var command: BuiltInCommand {
+    willSet { update(newValue) }
+  }
 
-  init(command: Binding<BuiltInCommand>) {
-    _command = command
+  var update: (BuiltInCommand) -> Void
+
+  init(command: BuiltInCommand,
+       update: @escaping (BuiltInCommand) -> Void = { _ in }) {
+    self._command = State(initialValue: command)
+    self.update = update
   }
 
   var body: some View {
@@ -19,8 +25,11 @@ struct EditBuiltInCommand: View {
       VStack {
         Picker("Command: ", selection: Binding(get: {
           selection
-        }, set: {
-          selection = $0
+        }, set: { newSelection in
+          selection = newSelection
+          guard let kind = BuiltInCommand.Kind.allCases
+                  .first(where: { $0.id == newSelection }) else { return }
+          self.command = BuiltInCommand.init(kind: kind)
         })) {
           ForEach(BuiltInCommand.Kind.allCases) { command in
             Text(command.displayValue)
@@ -40,6 +49,6 @@ struct EditBuiltInCommand_Previews: PreviewProvider, TestPreviewProvider {
   }
 
   static var testPreview: some View {
-    EditBuiltInCommand(command: .constant(BuiltInCommand.init(kind: .quickRun)))
+    EditBuiltInCommand(command: BuiltInCommand.init(kind: .quickRun))
   }
 }

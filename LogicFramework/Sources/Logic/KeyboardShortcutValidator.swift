@@ -12,7 +12,7 @@ public class KeyboardShortcutValidator {
     case escape = 53
   }
 
-  private let keycodeMapper: KeyCodeMapping
+  public let keycodeMapper: KeyCodeMapping
   private var systemKeyboardShortcuts = [KeyboardShortcut]()
 
   public init(keycodeMapper: KeyCodeMapping) {

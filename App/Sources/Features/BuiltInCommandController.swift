@@ -27,6 +27,9 @@ class BuiltInCommandController: BuiltInCommandControlling {
       DispatchQueue.main.async { [weak self] in
         guard let self = self else { return }
         switch command.kind {
+        case .repeatLastKeystroke:
+          Swift.print("Should repeat the last keystroke.")
+          break
         case .quickRun:
           guard let windowController = self.windowController else {
             promise(.failure(BuiltInCommandError.noWindowController))
