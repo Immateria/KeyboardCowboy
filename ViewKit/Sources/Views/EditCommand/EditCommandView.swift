@@ -3,6 +3,7 @@ import SwiftUI
 import ModelKit
 
 struct EditCommandView: View {
+  let imageSize = CGSize(width: 32, height: 32)
   @ObservedObject var applicationProvider: ApplicationProvider
   @ObservedObject var openPanelController: OpenPanelController
   let saveAction: (Command) -> Void
@@ -23,29 +24,28 @@ struct EditCommandView: View {
     self.cancelAction = cancelAction
     self.commands = ModelFactory().commands(id: command.id)
     _command = .init(initialValue: command)
-    _selection = .init(initialValue: selection)
+    _selection = .init(initialValue: command)
   }
 
   var body: some View {
     VStack(spacing: 0) {
       HStack(alignment: .top, spacing: 0) {
-        list
-          .frame(width: 250)
-          .listStyle(PlainListStyle())
+        list.frame(width: 250)
         VStack {
-          editView
-            .frame(width: 450)
+          editView.frame(width: 450)
+          Spacer()
+          Divider()
+          buttons.padding(8).frame(alignment: .bottom)
         }
       }.background(Color(.windowBackgroundColor))
 
-      Divider()
-      buttons.padding(8)
     }
     .frame(height: 400)
   }
 }
 
 private extension EditCommandView {
+
   var list: some View {
     List(selection: Binding<Command?>(get: { selection }, set: { newCommand in
       if let newCommand = newCommand {
@@ -54,90 +54,134 @@ private extension EditCommandView {
       selection = newCommand
     }) ) {
       ForEach(commands, id: \.self) { command in
-        CommandView(command: command,
-                    editAction: { _ in },
-                    revealAction: { _ in },
-                    runAction: { _ in },
-                    showContextualMenu: false)
-          .padding(.horizontal, 4)
-          .padding(.vertical, 8)
-          .frame(height: 48)
-          .tag(command)
+        HStack {
+          switch command {
+          case .application:
+            FeatureIcon(color: .red, size: imageSize) {
+              AppSymbol()
+                .fixedSize(horizontal: true, vertical: true)
+                .padding()
+            }
+          case .script(let kind):
+            switch kind {
+            case .appleScript:
+              FeatureIcon(color: .orange, size: imageSize, {
+                ScriptSymbol(cornerRadius: 3,
+                             foreground: .yellow,
+                             background: .white.opacity(0.7),
+                             borderColor: .white)
+              }).redacted(reason: .placeholder)
+            case .shell:
+              FeatureIcon(color: .yellow, size: imageSize, {
+                ScriptSymbol(cornerRadius: 3,
+                             foreground: .yellow,
+                             background: .white.opacity(0.7),
+                             borderColor: .white)
+              }).redacted(reason: .placeholder)
+            }
+          case .keyboard:
+            FeatureIcon(color: .green, size: imageSize, {
+              CommandSymbolIcon(background: .white.opacity(0.85), textColor: Color.green)
+            }).redacted(reason: .placeholder)
+          case .open(let kind):
+            if !kind.isUrl {
+              FeatureIcon(color: .blue, size: imageSize, {
+                FolderSymbol(cornerRadius: 0.06, textColor: .blue)
+              }).redacted(reason: .placeholder)
+            } else {
+              FeatureIcon(color: .purple, size: imageSize, {
+                URLSymbol()
+              }).redacted(reason: .placeholder)
+            }
+          case .type:
+            FeatureIcon(color: .pink, size: imageSize, {
+              TypingSymbol(foreground: Color.pink)
+            }).redacted(reason: .placeholder)
+          case .builtIn:
+            FeatureIcon(color: .gray, size: imageSize, {
+              Image(systemName: "tornado")
+                .foregroundColor(Color.white)
+            }).redacted(reason: .placeholder)
+          }
+          Text(command.name)
+        }
+        .tag(command.id)
+        .frame(height: 36)
       }
     }
   }
 
   @ViewBuilder
   var editView: some View {
-      switch selection {
-      case .application(let command):
-        EditApplicationCommandView(
-          command: command,
-          installedApplications: applicationProvider.state) { applicationCommand in
-          self.command = .application(applicationCommand)
-        }
-      case .script(let kind):
-        switch kind {
-        case .appleScript(let id, let name, let source):
-          EditAppleScriptView(
-            command: ScriptCommand.appleScript(id: id, name: name, source: source),
-            openPanelController: openPanelController) { scriptCommand in
-            self.command = .script(scriptCommand)
-          }
-        case .shell(let id, let name, let source):
-          EditShellScriptView(
-            command: ScriptCommand.shell(id: id, name: name, source: source),
-          openPanelController: openPanelController) { scriptCommand in
-            self.command = .script(scriptCommand)
-          }
-        }
-      case .open(let command):
-        if command.isUrl {
-          EditOpenURLCommandView(
-            command: command,
-            installedApplications: applicationProvider.state) { openCommand in
-            self.command = .open(openCommand)
-          }
-        } else {
-          EditOpenFileCommandView(
-            command: command,
-            openPanelController: openPanelController,
-            installedApplications: applicationProvider.state) { openCommand in
-            self.command = .open(openCommand)
-          }
-        }
-        EmptyView()
-      case .keyboard(let command):
-        EditKeyboardShortcutView(command: Binding(
-          get: { command },
-          set: { keyboardCommand in
-            let command: Command = .keyboard(keyboardCommand)
-            self.command = command
-            self.selection = command
-          }
-        ))
-      case .type(let command):
-        EditTypeView(command: Binding(
-          get: { command },
-          set: { typeCommand in
-            let command: Command = .type(typeCommand)
-            self.command = command
-            self.selection = command
-          }
-        ))
-      case .builtIn(let command):
-        EditBuiltInCommand(command: Binding(
-          get: { command },
-          set: { builtInCommand in
-            let command: Command = .builtIn(builtInCommand)
-            self.command = command
-            self.selection = command
-          }
-        ))
-      case .none:
-        Text("Pick a command type")
-          .padding()
+    switch selection {
+    case .application(let command):
+      EditApplicationCommandView(
+        command: command,
+        installedApplications: applicationProvider.state) { applicationCommand in
+        self.command = .application(applicationCommand)
       }
+    case .script(let kind):
+      switch kind {
+      case .appleScript(let id, let name, let source):
+        EditAppleScriptView(
+          command: ScriptCommand.appleScript(id: id, name: name, source: source),
+          openPanelController: openPanelController) { scriptCommand in
+          self.command = .script(scriptCommand)
+        }
+      case .shell(let id, let name, let source):
+        EditShellScriptView(
+          command: ScriptCommand.shell(id: id, name: name, source: source),
+          openPanelController: openPanelController) { scriptCommand in
+          self.command = .script(scriptCommand)
+        }
+      }
+    case .open(let command):
+      if command.isUrl {
+        EditOpenURLCommandView(
+          command: command,
+          installedApplications: applicationProvider.state) { openCommand in
+          self.command = .open(openCommand)
+        }
+      } else {
+        EditOpenFileCommandView(
+          command: command,
+          openPanelController: openPanelController,
+          installedApplications: applicationProvider.state) { openCommand in
+          self.command = .open(openCommand)
+        }
+      }
+      EmptyView()
+    case .keyboard(let command):
+      EditKeyboardShortcutView(command: Binding(
+        get: { command },
+        set: { keyboardCommand in
+        let command: Command = .keyboard(keyboardCommand)
+        self.command = command
+        self.selection = command
+      }
+      ))
+    case .type(let command):
+      EditTypeView(command: Binding(
+        get: { command },
+        set: { typeCommand in
+        let command: Command = .type(typeCommand)
+        self.command = command
+        self.selection = command
+      }
+      ))
+    case .builtIn(let command):
+      EditBuiltInCommand(command: Binding(
+        get: { command },
+        set: { builtInCommand in
+        let command: Command = .builtIn(builtInCommand)
+        self.command = command
+        self.selection = command
+      }
+      ))
+    case .none:
+      Text("Pick a command type")
+        .padding()
+    }
   }
 
   var buttons: some View {

@@ -101,6 +101,7 @@ public struct QuickRunView: View {
         viewController.perform(.run(selection))
         fallthrough
       case .escape:
+        query = ""
         firstResponder = .textField
         window.close()
         self.selection = nil

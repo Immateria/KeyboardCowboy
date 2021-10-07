@@ -7,51 +7,48 @@ struct AppSymbol: View {
   }
 
   var body: some View {
-    ZStack {
-      appOutline()
-        .cornerRadius(8.0)
-        .padding()
-    }
+    appOutline()
+      .cornerRadius(8.0)
+      .padding()
   }
 
   @ViewBuilder
   func appOutline() -> some View {
     ZStack {
-      RoundedRectangle(cornerRadius: 8)
-        .stroke(Color(.white))
-
       GeometryReader { proxy in
+        RoundedRectangle(cornerRadius: 8)
+          .stroke(Color.white)
         // Horizontal lines
 
         Path { path in
           path.move(to: CGPoint(x: 2, y: 2))
           path.addLine(to: CGPoint(x: proxy.size.width - 2,
                                    y: proxy.size.height - 2))
-        }.stroke(Color(.white).opacity(0.6), lineWidth: 0.5)
+        }.stroke(Color.white.opacity(0.6), lineWidth: 0.75)
 
         Path { path in
           path.move(to: CGPoint(x: 2, y: proxy.size.width - 2))
           path.addLine(to: CGPoint(x: proxy.size.width - 2,
                                    y: 2))
-        }.stroke(Color(.white).opacity(0.6), lineWidth: 0.5)
+        }.stroke(Color.white.opacity(0.6), lineWidth: 0.75)
 
         Path { path in
           path.move(to: CGPoint(x: 0, y: proxy.size.height * 0.25))
           path.addLine(to: CGPoint(x: proxy.size.width,
                                    y: proxy.size.height * 0.25))
-        }.stroke(Color(.white).opacity(0.6), lineWidth: 0.5)
+        }.stroke(Color.white.opacity(0.6), lineWidth: 0.75)
 
         Path { path in
           path.move(to: CGPoint(x: 0, y: proxy.size.height * 0.5))
           path.addLine(to: CGPoint(x: proxy.size.width,
                                    y: proxy.size.height * 0.5))
-        }.stroke(Color(.white).opacity(0.6), lineWidth: 0.5)
+        }.stroke(Color.white.opacity(0.6), lineWidth: 0.75)
 
         Path { path in
           path.move(to: CGPoint(x: 0, y: proxy.size.height * 0.75))
           path.addLine(to: CGPoint(x: proxy.size.width,
                                    y: proxy.size.height * 0.75))
-        }.stroke(Color(.white).opacity(0.6), lineWidth: 0.5)
+        }.stroke(Color.white.opacity(0.6), lineWidth: 0.75)
 
         // Vertical lines
 
@@ -59,33 +56,33 @@ struct AppSymbol: View {
           path.move(to: CGPoint(x: proxy.size.height * 0.25, y: 2))
           path.addLine(to: CGPoint(x: proxy.size.height * 0.25,
                                    y: proxy.size.height))
-        }.stroke(Color(.white).opacity(0.6), lineWidth: 0.5)
+        }.stroke(Color.white.opacity(0.6), lineWidth: 0.75)
 
         Path { path in
           path.move(to: CGPoint(x: proxy.size.height * 0.5, y: 2))
           path.addLine(to: CGPoint(x: proxy.size.height * 0.5,
                                    y: proxy.size.height))
-        }.stroke(Color(.white).opacity(0.6), lineWidth: 0.5)
+        }.stroke(Color.white.opacity(0.6), lineWidth: 0.75)
 
         Path { path in
           path.move(to: CGPoint(x: proxy.size.height * 0.75, y: 2))
           path.addLine(to: CGPoint(x: proxy.size.height * 0.75,
                                    y: proxy.size.height))
-        }.stroke(Color(.white).opacity(0.6), lineWidth: 0.5)
+        }.stroke(Color.white.opacity(0.6), lineWidth: 0.75)
       }
 
       Circle()
-        .stroke(Color(.white), lineWidth: 0.5)
+        .stroke(Color.white, lineWidth: 0.75)
         .frame(width: 30, height: 30)
         .opacity(0.6)
 
       Circle()
-        .stroke(Color(.white), lineWidth: 0.5)
+        .stroke(Color.white, lineWidth: 0.75)
         .frame(width: 24, height: 24)
         .opacity(0.4)
 
       Circle()
-        .stroke(Color(.white), lineWidth: 0.5)
+        .stroke(Color.white, lineWidth: 0.75)
         .frame(width: 12, height: 12)
         .opacity(0.4)
 
@@ -102,19 +99,6 @@ struct AppSymbol_Previews: PreviewProvider {
       ZStack {
         AppSymbol()
           .background(Color.red)
-          .cornerRadius(8.0)
-          .rotationEffect(.degrees(-20))
-          .offset(x: -2, y: -2)
-
-        AppSymbol()
-          .background(Color.red)
-          .cornerRadius(8.0)
-          .rotationEffect(.degrees(-10))
-          .offset(x: -1, y: -1)
-
-        AppSymbol()
-          .background(Color.red)
-          .cornerRadius(8.0)
       }
       .padding()
       .frame(width: 64, height: 64)

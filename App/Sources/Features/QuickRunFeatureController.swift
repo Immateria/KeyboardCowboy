@@ -36,6 +36,7 @@ class QuickRunFeatureController: ViewController {
     case .run(let workflowId):
       guard let workflow = state.first(where: { $0.id == workflowId}) else { return }
       commandController.run(workflow.commands)
+      query = ""
       window?.close()
     }
   }

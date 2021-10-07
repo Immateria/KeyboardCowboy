@@ -86,11 +86,11 @@ struct FolderSymbol: View {
     LinearGradient(
       gradient: Gradient(
         stops: [
-          .init(color: Color(.white).opacity(0.2), location: 0.0),
+          .init(color: Color.white.opacity(0.2), location: 0.0),
           .init(color: Color(.windowBackgroundColor), location: 0.1),
-          .init(color: Color(.white), location: 0.125),
+          .init(color: Color.white, location: 0.125),
           .init(color: Color(.windowBackgroundColor), location: 0.145),
-          .init(color: Color(.white), location: 0.145),
+          .init(color: Color.white, location: 0.145),
           .init(color: Color(.gridColor).opacity(0.75), location: 1.0),
         ]),
       startPoint: .top,

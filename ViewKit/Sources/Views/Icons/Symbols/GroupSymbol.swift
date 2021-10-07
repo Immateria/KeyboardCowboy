@@ -8,14 +8,14 @@ struct GroupSymbol: View {
           HStack(spacing: 0) {
             groupIllustration(proxy.frame(in: .local).transform { rect in
               var rect = rect
-              rect.size.width = rect.size.width / 2
-              rect.size.height = rect.size.height / 2
+              rect.size.width /= 2.0
+              rect.size.height /= 2.0
               return rect
             }, color: .white)
             groupIllustration(proxy.frame(in: .local).transform { rect in
               var rect = rect
-              rect.size.width = rect.size.width / 2
-              rect.size.height = rect.size.height / 2
+              rect.size.width /= 2.0
+              rect.size.height /= 2.0
               return rect
             }, color: .white)
           }
@@ -24,14 +24,14 @@ struct GroupSymbol: View {
 
           groupIllustration(proxy.frame(in: .local).transform { rect in
             var rect = rect
-            rect.size.width = rect.size.width / 2
-            rect.size.height = rect.size.height / 2
+            rect.size.width /= 2.0
+            rect.size.height /= 2.0
             return rect
           }, color: .white)
-            .offset(x: 0, y: proxy.size.height / 5)
+            .offset(x: 0, y: proxy.size.height / 5.0)
 
         }
-        .offset(x: 0, y: -proxy.size.height / 10)
+        .offset(x: 0, y: -proxy.size.height / 10.0)
       }
     }
   }
@@ -40,8 +40,8 @@ struct GroupSymbol: View {
     VStack(alignment: .center, spacing: 0) {
       Circle()
         .fill(color)
-        .frame(width: rect.size.width / 2,
-               height: rect.size.height / 2,
+        .frame(width: rect.size.width / 2.0,
+               height: rect.size.height / 2.0,
                alignment: .center)
 
       Path { path in

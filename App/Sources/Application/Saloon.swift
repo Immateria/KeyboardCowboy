@@ -258,7 +258,9 @@ class Saloon: ViewKitStore, MenubarControllerDelegate {
       .receive(on: DispatchQueue.main)
       .sink { groups in
         self.groups = groups
-        self.quickRunFeatureController?.storage = self.groups.flatMap({ $0.workflows })
+        self.quickRunFeatureController?.storage = self.groups
+          .flatMap({ $0.workflows })
+          .filter({ $0.isEnabled })
 
         if let selectedGroup = self.selectedGroup,
            let group =  groups.first(where: { $0.id == selectedGroup.id }) {

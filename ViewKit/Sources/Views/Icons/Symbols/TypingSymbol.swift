@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct TrafficSymbol: View {
+struct TypingSymbol: View {
   private let lineWidth: CGFloat = 0.5
   let foreground: Color
 
@@ -29,8 +29,8 @@ struct TrafficSymbol_Previews: PreviewProvider {
   static var previews: some View {
     testPreview.previewAllColorSchemes()
   }
-  
+
   static var testPreview: some View {
-    TrafficSymbol(foreground: Color.accentColor)
+    TypingSymbol(foreground: Color.accentColor)
   }
 }

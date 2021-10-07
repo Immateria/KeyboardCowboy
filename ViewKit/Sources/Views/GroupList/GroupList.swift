@@ -49,7 +49,6 @@ public struct GroupList: View {
             store.context.groups.perform(.moveGroup(from: i, to: newOffset))
           }
         })
-        .onInsert(of: [], perform: { _, _ in })
       }
       .collapsible(true)
     }
