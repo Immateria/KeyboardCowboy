@@ -232,12 +232,13 @@ public final class CoreController: NSObject, CoreControlling,
         } else if case .builtIn(let command) = workflow.commands.last, command.kind == .repeatLastKeystroke {
           ignoreLastKeystroke = true
 
-          if context.type == .keyDown {
             if let workflow = previousAction.workflow {
               if case .keyboard(let command) = workflow.commands.last {
                 _ = keyboardController.run(command, type: context.type, eventSource: context.eventSource)
               } else {
-                commandController.run(workflow.commands)
+                if context.type == .keyDown {
+                  commandController.run(workflow.commands)
+                }
               }
             } else if let hotkeyContext = previousAction.context {
               guard let container = try? keyboardShortcutValidator.keycodeMapper.map(Int(hotkeyContext.keyCode), modifiers: 0) else {
@@ -250,9 +251,7 @@ public final class CoreController: NSObject, CoreControlling,
                 key: container.displayValue,
                 modifiers: modifiers)
               let keyboardCommand = KeyboardCommand(keyboardShortcut: keyboardShortcut)
-
-              commandController.run([Command.keyboard(keyboardCommand)])
-            }
+              _ = keyboardController.run(keyboardCommand, type: context.type, eventSource: context.eventSource)
           }
 
         } else if context.type == .keyDown {
