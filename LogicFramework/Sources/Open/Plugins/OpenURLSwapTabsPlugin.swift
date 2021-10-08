@@ -32,7 +32,13 @@ final class OpenURLSwapTabsPlugin {
             if currentURL contains searchPattern then
               set index of cWindow to 1
               set current tab of cWindow to cTab
-              activate
+              set visible of cWindow to true
+              tell application "System Events" to tell process "Safari"
+                perform action "AXRaise" of window 1
+                do shell script "open -a Safari"
+              end tell
+              delay 0.2
+              set current tab of cWindow to cTab
               return true
               exit repeat
             end if
