@@ -241,13 +241,14 @@ public final class CoreController: NSObject, CoreControlling,
                 }
               }
             } else if let hotkeyContext = previousAction.context {
-              guard let container = try? keyboardShortcutValidator.keycodeMapper.map(Int(hotkeyContext.keyCode), modifiers: 0) else {
+              guard let container = try? keyboardShortcutValidator.keycodeMapper.map(Int(hotkeyContext.keyCode),
+                                                                                     modifiers: 0) else {
                 continue
               }
 
-              let modifiers = ModifierKey.fromCGEvent(hotkeyContext.event, specialKeys: Array(KeyCodes.specialKeys.keys))
+              let modifiers = ModifierKey.fromCGEvent(hotkeyContext.event,
+                                                      specialKeys: Array(KeyCodes.specialKeys.keys))
               let keyboardShortcut = KeyboardShortcut(
-                id: UUID().uuidString,
                 key: container.displayValue,
                 modifiers: modifiers)
               let keyboardCommand = KeyboardCommand(keyboardShortcut: keyboardShortcut)
