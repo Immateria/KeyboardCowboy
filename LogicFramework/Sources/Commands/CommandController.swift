@@ -14,6 +14,8 @@ public protocol CommandControllingDelegate: AnyObject {
 
 public protocol CommandControlling: AnyObject {
   var delegate: CommandControllingDelegate? { get set }
+  var currentContext: HotKeyContext? { get set }
+  var previousAction: (context: HotKeyContext?, workflow: Workflow?) { get set }
   /// Run a collection of `Command`´s in sequential order,
   /// if one command fails, the entire chain should stop.
   ///
@@ -28,6 +30,12 @@ public enum CommandControllerError: Error {
 
 public final class CommandController: CommandControlling {
   weak public var delegate: CommandControllingDelegate?
+  public var currentContext: HotKeyContext? {
+    willSet { builtInCommandController.currentContext = newValue }
+  }
+  public var previousAction: (context: HotKeyContext?, workflow: Workflow?) = (context: nil, workflow: nil) {
+    willSet { builtInCommandController.previousAction = newValue }
+  }
 
   let applicationCommandController: ApplicationCommandControlling
   let builtInCommandController: BuiltInCommandControlling
@@ -54,6 +62,9 @@ public final class CommandController: CommandControlling {
     self.keyboardCommandController = keyboardCommandController
     self.openCommandController = openCommandController
     self.shellScriptCommandController = shellScriptCommandController
+
+    self.builtInCommandController.commandController = self
+    self.builtInCommandController.keyboardController = keyboardCommandController
   }
 
   // MARK: Public methods

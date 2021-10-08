@@ -1,8 +1,8 @@
 import Cocoa
 import Carbon
 
-struct KeyCodes {
-  static let specialKeys: [Int: String] =
+public struct KeyCodes {
+  public static let specialKeys: [Int: String] =
     [
       kVK_F1: "F1",
       kVK_F2: "F2",

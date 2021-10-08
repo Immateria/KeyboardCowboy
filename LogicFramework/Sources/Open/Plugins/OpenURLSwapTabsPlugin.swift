@@ -35,10 +35,11 @@ final class OpenURLSwapTabsPlugin {
               set visible of cWindow to true
               tell application "System Events" to tell process "Safari"
                 perform action "AXRaise" of window 1
-                do shell script "open -a Safari"
+                do shell script "open -j -a Safari"
               end tell
               delay 0.2
               set current tab of cWindow to cTab
+              set visible of cWindow to true
               return true
               exit repeat
             end if

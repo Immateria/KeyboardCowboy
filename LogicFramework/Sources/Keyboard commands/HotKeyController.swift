@@ -10,11 +10,11 @@ public protocol HotKeyControlling {
 }
 
 public class HotKeyContext {
-  let keyCode: Int64
-  let event: CGEvent
-  let eventSource: CGEventSource?
-  let type: CGEventType
-  var result: Unmanaged<CGEvent>?
+  public let keyCode: Int64
+  public let event: CGEvent
+  public let eventSource: CGEventSource?
+  public let type: CGEventType
+  public var result: Unmanaged<CGEvent>?
 
   init(event: CGEvent,
        eventSource: CGEventSource?,

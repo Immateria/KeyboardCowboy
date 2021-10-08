@@ -37,7 +37,6 @@ public final class CoreController: NSObject, CoreControlling,
   let workflowController: WorkflowControlling
   let workspace: WorkspaceProviding
   var cache = [String: Int]()
-  var previousAction: (context: HotKeyContext?, workflow: Workflow?)
 
   public var installedApplications = [Application]()
   public var groups: [Group] { return groupsController.groups }
@@ -198,8 +197,8 @@ public final class CoreController: NSObject, CoreControlling,
 
   public func intercept(_ context: HotKeyContext) {
     let counter = currentKeyboardShortcuts.count
-    var foundWorkflow: Bool = false
     var ignoreLastKeystroke: Bool = false
+    var matchedWorkflow: Workflow?
     for workflow in activeWorkflows {
       guard case let .keyboardShortcuts(shortcuts) = workflow.trigger,
             !shortcuts.isEmpty,
@@ -224,53 +223,30 @@ public final class CoreController: NSObject, CoreControlling,
       guard modifiersMatch else { continue }
 
       context.result = nil
+      commandController.currentContext = context
 
       if keyboardShortcut == shortcuts.last {
         if case .keyboard(let command) = workflow.commands.last {
           _ = keyboardController.run(command, type: context.type, eventSource: context.eventSource)
-          previousAction = (context: context, workflow: workflow)
-        } else if case .builtIn(let command) = workflow.commands.last, command.kind == .repeatLastKeystroke {
-          ignoreLastKeystroke = true
-
-            if let workflow = previousAction.workflow {
-              if case .keyboard(let command) = workflow.commands.last {
-                _ = keyboardController.run(command, type: context.type, eventSource: context.eventSource)
-              } else {
-                if context.type == .keyDown {
-                  commandController.run(workflow.commands)
-                }
-              }
-            } else if let hotkeyContext = previousAction.context {
-              guard let container = try? keyboardShortcutValidator.keycodeMapper.map(Int(hotkeyContext.keyCode),
-                                                                                     modifiers: 0) else {
-                continue
-              }
-
-              let modifiers = ModifierKey.fromCGEvent(hotkeyContext.event,
-                                                      specialKeys: Array(KeyCodes.specialKeys.keys))
-              let keyboardShortcut = KeyboardShortcut(
-                key: container.displayValue,
-                modifiers: modifiers)
-              let keyboardCommand = KeyboardCommand(keyboardShortcut: keyboardShortcut)
-              _ = keyboardController.run(keyboardCommand, type: context.type, eventSource: context.eventSource)
-          }
-
         } else if context.type == .keyDown {
           Debug.print("⌨️ Workflow: \(workflow.name): \(currentKeyboardSequence)")
-          previousAction = (context: context, workflow: workflow)
+          if case .builtIn(let command) = workflow.commands.last, command.kind == .repeatLastKeystroke {
+            ignoreLastKeystroke = true
+          } else {
+            matchedWorkflow = workflow
+          }
           _ = respond(to: keyboardShortcut)
         }
       } else if context.type == .keyDown {
-        previousAction = (context: context, workflow: workflow)
+        matchedWorkflow = workflow
         _ = respond(to: keyboardShortcut)
       }
 
-      foundWorkflow = true
       break
     }
 
-    if !foundWorkflow && !ignoreLastKeystroke {
-      previousAction = (context: context, workflow: nil)
+    if !ignoreLastKeystroke, context.type == .keyDown {
+      commandController.previousAction = (context: context, workflow: matchedWorkflow)
     }
   }
 

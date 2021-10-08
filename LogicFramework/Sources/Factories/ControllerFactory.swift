@@ -41,6 +41,7 @@ public final class ControllerFactory {
       KeyboardCommandController(keyCodeMapper: _keycodeMapper)
     let workflowController = workflowController ?? WorkflowController()
     let keyboardValidator = KeyboardShortcutValidator(keycodeMapper: keycodeMapper)
+    builtInCommandController.keyboardShortcutValidator = keyboardValidator
     return CoreController(initialState,
                           bundleIdentifier: bundleIdentifier,
                           commandController: commandController,

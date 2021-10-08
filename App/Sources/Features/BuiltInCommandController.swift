@@ -9,6 +9,12 @@ class BuiltInCommandController: BuiltInCommandControlling {
   }
 
   var windowController: QuickRunWindowController?
+  public weak var commandController: CommandControlling?
+  public var currentContext: HotKeyContext?
+  public var keyboardController: KeyboardCommandControlling?
+  public var keyboardShortcutValidator: KeyboardShortcutValidator?
+  public var previousAction: (context: HotKeyContext?, workflow: Workflow?) = (context: nil, workflow: nil)
+
   private var previousApplication: RunningApplication?
   private var subscriptions = [AnyCancellable]()
 
@@ -28,8 +34,36 @@ class BuiltInCommandController: BuiltInCommandControlling {
         guard let self = self else { return }
         switch command.kind {
         case .repeatLastKeystroke:
-          Swift.print("Should repeat the last keystroke.")
-          break
+          guard let currentContext = self.currentContext,
+                let keyboardController = self.keyboardController,
+                let commandController = self.commandController else {
+            return
+          }
+
+          if let workflow = self.previousAction.workflow {
+            if case .keyboard(let command) = workflow.commands.last {
+              _ = keyboardController.run(command, type: currentContext.type, eventSource: currentContext.eventSource)
+            } else {
+              if currentContext.type == .keyDown {
+                commandController.run(workflow.commands)
+              }
+            }
+          } else if let hotkeyContext = self.previousAction.context {
+            guard let container = try? self.keyboardShortcutValidator?.keycodeMapper.map(Int(hotkeyContext.keyCode),
+                                                                                         modifiers: 0) else {
+              return
+            }
+
+            let modifiers = ModifierKey.fromCGEvent(hotkeyContext.event,
+                                                    specialKeys: Array(KeyCodes.specialKeys.keys))
+            let keyboardShortcut = KeyboardShortcut(
+              key: container.displayValue,
+              modifiers: modifiers)
+            let keyboardCommand = KeyboardCommand(keyboardShortcut: keyboardShortcut)
+            _ = keyboardController.run(keyboardCommand,
+                                       type: currentContext.type, eventSource:
+                                        currentContext.eventSource)
+          }
         case .quickRun:
           guard let windowController = self.windowController else {
             promise(.failure(BuiltInCommandError.noWindowController))
