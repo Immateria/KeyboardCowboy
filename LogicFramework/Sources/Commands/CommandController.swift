@@ -15,7 +15,7 @@ public protocol CommandControllingDelegate: AnyObject {
 public protocol CommandControlling: AnyObject {
   var delegate: CommandControllingDelegate? { get set }
   var currentContext: HotKeyContext? { get set }
-  var previousAction: (context: HotKeyContext?, workflow: Workflow?) { get set }
+  var previousAction: RecordedAction { get set }
   /// Run a collection of `Command`´s in sequential order,
   /// if one command fails, the entire chain should stop.
   ///
@@ -33,8 +33,8 @@ public final class CommandController: CommandControlling {
   public var currentContext: HotKeyContext? {
     willSet { builtInCommandController.currentContext = newValue }
   }
-  public var previousAction: (context: HotKeyContext?, workflow: Workflow?) = (context: nil, workflow: nil) {
-    willSet { builtInCommandController.previousAction = newValue }
+  public var previousAction = RecordedAction() {
+    willSet { builtInCommandController.receive(newValue) }
   }
 
   let applicationCommandController: ApplicationCommandControlling
@@ -127,12 +127,14 @@ public final class CommandController: CommandControlling {
       // Invoke keyboard command controller on the main thread.
       DispatchQueue.main.async { [weak self] in
         guard let self = self else { return }
-        self.subscribeToPublisher(self.keyboardCommandController.run(keyboardCommand,
-                                                           type: .keyDown,
-                                                           eventSource: nil), for: command)
-        self.subscribeToPublisher(self.keyboardCommandController.run(keyboardCommand,
-                                                           type: .keyUp,
-                                                           eventSource: nil), for: command)
+        self.subscribeToPublisher(self.keyboardCommandController.run(
+          keyboardCommand,
+          type: .keyDown,
+          eventSource: nil), for: command)
+        self.subscribeToPublisher(self.keyboardCommandController.run(
+          keyboardCommand,
+          type: .keyUp,
+          eventSource: nil), for: command)
       }
     }
   }

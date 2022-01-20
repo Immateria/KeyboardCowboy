@@ -15,61 +15,61 @@ struct AppSymbol: View {
   @ViewBuilder
   func appOutline() -> some View {
     ZStack {
-      GeometryReader { proxy in
-        RoundedRectangle(cornerRadius: 8)
-          .stroke(Color.white)
-        // Horizontal lines
-
-        Path { path in
-          path.move(to: CGPoint(x: 2, y: 2))
-          path.addLine(to: CGPoint(x: proxy.size.width - 2,
-                                   y: proxy.size.height - 2))
-        }.stroke(Color.white.opacity(0.6), lineWidth: 0.75)
-
-        Path { path in
-          path.move(to: CGPoint(x: 2, y: proxy.size.width - 2))
-          path.addLine(to: CGPoint(x: proxy.size.width - 2,
-                                   y: 2))
-        }.stroke(Color.white.opacity(0.6), lineWidth: 0.75)
-
-        Path { path in
-          path.move(to: CGPoint(x: 0, y: proxy.size.height * 0.25))
-          path.addLine(to: CGPoint(x: proxy.size.width,
-                                   y: proxy.size.height * 0.25))
-        }.stroke(Color.white.opacity(0.6), lineWidth: 0.75)
-
-        Path { path in
-          path.move(to: CGPoint(x: 0, y: proxy.size.height * 0.5))
-          path.addLine(to: CGPoint(x: proxy.size.width,
-                                   y: proxy.size.height * 0.5))
-        }.stroke(Color.white.opacity(0.6), lineWidth: 0.75)
-
-        Path { path in
-          path.move(to: CGPoint(x: 0, y: proxy.size.height * 0.75))
-          path.addLine(to: CGPoint(x: proxy.size.width,
-                                   y: proxy.size.height * 0.75))
-        }.stroke(Color.white.opacity(0.6), lineWidth: 0.75)
-
-        // Vertical lines
-
-        Path { path in
-          path.move(to: CGPoint(x: proxy.size.height * 0.25, y: 2))
-          path.addLine(to: CGPoint(x: proxy.size.height * 0.25,
-                                   y: proxy.size.height))
-        }.stroke(Color.white.opacity(0.6), lineWidth: 0.75)
-
-        Path { path in
-          path.move(to: CGPoint(x: proxy.size.height * 0.5, y: 2))
-          path.addLine(to: CGPoint(x: proxy.size.height * 0.5,
-                                   y: proxy.size.height))
-        }.stroke(Color.white.opacity(0.6), lineWidth: 0.75)
-
-        Path { path in
-          path.move(to: CGPoint(x: proxy.size.height * 0.75, y: 2))
-          path.addLine(to: CGPoint(x: proxy.size.height * 0.75,
-                                   y: proxy.size.height))
-        }.stroke(Color.white.opacity(0.6), lineWidth: 0.75)
-      }
+//      GeometryReader { proxy in
+//        RoundedRectangle(cornerRadius: 8)
+//          .stroke(Color.white)
+//        // Horizontal lines
+//
+//        Path { path in
+//          path.move(to: CGPoint(x: 2, y: 2))
+//          path.addLine(to: CGPoint(x: proxy.size.width - 2,
+//                                   y: proxy.size.height - 2))
+//        }.stroke(Color.white.opacity(0.6), lineWidth: 0.75)
+//
+//        Path { path in
+//          path.move(to: CGPoint(x: 2, y: proxy.size.width - 2))
+//          path.addLine(to: CGPoint(x: proxy.size.width - 2,
+//                                   y: 2))
+//        }.stroke(Color.white.opacity(0.6), lineWidth: 0.75)
+//
+//        Path { path in
+//          path.move(to: CGPoint(x: 0, y: proxy.size.height * 0.25))
+//          path.addLine(to: CGPoint(x: proxy.size.width,
+//                                   y: proxy.size.height * 0.25))
+//        }.stroke(Color.white.opacity(0.6), lineWidth: 0.75)
+//
+//        Path { path in
+//          path.move(to: CGPoint(x: 0, y: proxy.size.height * 0.5))
+//          path.addLine(to: CGPoint(x: proxy.size.width,
+//                                   y: proxy.size.height * 0.5))
+//        }.stroke(Color.white.opacity(0.6), lineWidth: 0.75)
+//
+//        Path { path in
+//          path.move(to: CGPoint(x: 0, y: proxy.size.height * 0.75))
+//          path.addLine(to: CGPoint(x: proxy.size.width,
+//                                   y: proxy.size.height * 0.75))
+//        }.stroke(Color.white.opacity(0.6), lineWidth: 0.75)
+//
+//        // Vertical lines
+//
+//        Path { path in
+//          path.move(to: CGPoint(x: proxy.size.height * 0.25, y: 2))
+//          path.addLine(to: CGPoint(x: proxy.size.height * 0.25,
+//                                   y: proxy.size.height))
+//        }.stroke(Color.white.opacity(0.6), lineWidth: 0.75)
+//
+//        Path { path in
+//          path.move(to: CGPoint(x: proxy.size.height * 0.5, y: 2))
+//          path.addLine(to: CGPoint(x: proxy.size.height * 0.5,
+//                                   y: proxy.size.height))
+//        }.stroke(Color.white.opacity(0.6), lineWidth: 0.75)
+//
+//        Path { path in
+//          path.move(to: CGPoint(x: proxy.size.height * 0.75, y: 2))
+//          path.addLine(to: CGPoint(x: proxy.size.height * 0.75,
+//                                   y: proxy.size.height))
+//        }.stroke(Color.white.opacity(0.6), lineWidth: 0.75)
+//      }
 
       Circle()
         .stroke(Color.white, lineWidth: 0.75)

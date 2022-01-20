@@ -12,6 +12,8 @@ extension Command {
         return "ApplicationIcon"
       case .repeatLastKeystroke:
         return "ApplicationIcon"
+      case .recordSequence:
+        return "ApplicationIcon"
       }
     case .script:
       return "/System/Applications/Utilities/Script Editor.app"

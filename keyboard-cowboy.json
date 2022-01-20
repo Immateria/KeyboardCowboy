@@ -1544,7 +1544,7 @@
                 "path" : "\/Applications\/Microsoft Edge.app",
                 "id" : "EE1CCCD6-D4CA-468A-A17E-933AC23AA304",
                 "bundleIdentifier" : "com.microsoft.edgemac",
-                "bundleName" : "Edge"
+                "bundleName" : "Microsoft Edge"
               },
               "name" : "",
               "modifiers" : [
@@ -2784,6 +2784,25 @@
           }
         ],
         "name" : "Open Git client"
+      },
+      {
+        "id" : "3FF2E387-3D0E-4BEF-BFA7-18BBC0A6213A",
+        "name" : "Testing",
+        "commands" : [
+          {
+            "openCommand" : {
+              "path" : "http:\/\/www.github.com\/zenangst",
+              "id" : "89D29927-F760-4D64-8D92-B2A5366F9B7F",
+              "application" : {
+                "path" : "\/Applications\/Safari.app",
+                "id" : "BD5A7364-F06C-4F81-A0AF-A85ED5B262A1",
+                "bundleIdentifier" : "com.apple.Safari",
+                "bundleName" : "Safari"
+              },
+              "name" : "YEAH!"
+            }
+          }
+        ]
       }
     ],
     "color" : "#98989D"

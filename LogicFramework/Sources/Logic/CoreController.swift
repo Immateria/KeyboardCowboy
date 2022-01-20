@@ -5,7 +5,7 @@ import Combine
 import ModelKit
 
 public protocol CoreControlling: AnyObject {
-  var publisher: Published<[KeyboardShortcut]>.Publisher { get }
+  var publisher: Published<[ModelKit.KeyboardShortcut]>.Publisher { get }
   var commandController: CommandControlling { get }
   var groupsController: GroupsControlling { get }
   var groups: [Group] { get }
@@ -43,8 +43,12 @@ public final class CoreController: NSObject, CoreControlling,
 
   private var resetInterval: TimeInterval = 2.0
   private(set) var currentGroups = [Group]()
-  private(set) var currentKeyboardShortcuts = [KeyboardShortcut]()
-  @Published public var currentKeyboardSequence = [KeyboardShortcut]()
+  private(set) var currentKeyboardShortcuts = [ModelKit.KeyboardShortcut]()
+  @Published private(set) public var currentKeyboardSequence = [ModelKit.KeyboardShortcut]() {
+    willSet {
+
+    }
+  }
   public var publisher: Published<[KeyboardShortcut]>.Publisher { $currentKeyboardSequence }
   private var activeWorkflows = [Workflow]()
   private var state: CoreControllerState = .disabled
@@ -179,7 +183,7 @@ public final class CoreController: NSObject, CoreControlling,
         cancelReloadContext()
         reloadContext()
       } else {
-        resetKeyboardSequence()
+        currentKeyboardShortcuts = []
       }
     } else {
       let workflowNames = workflowsToActivate.compactMap({ $0.name })
@@ -198,7 +202,7 @@ public final class CoreController: NSObject, CoreControlling,
   public func intercept(_ context: HotKeyContext) {
     let counter = currentKeyboardShortcuts.count
     var ignoreLastKeystroke: Bool = false
-    var matchedWorkflow: Workflow?
+//    var matchedWorkflow: Workflow?
     for workflow in activeWorkflows {
       guard case let .keyboardShortcuts(shortcuts) = workflow.trigger,
             !shortcuts.isEmpty,
@@ -230,15 +234,16 @@ public final class CoreController: NSObject, CoreControlling,
           _ = keyboardController.run(command, type: context.type, eventSource: context.eventSource)
         } else if context.type == .keyDown {
           Debug.print("⌨️ Workflow: \(workflow.name): \(currentKeyboardSequence)")
+          ignoreLastKeystroke = true
           if case .builtIn(let command) = workflow.commands.last, command.kind == .repeatLastKeystroke {
             ignoreLastKeystroke = true
           } else {
-            matchedWorkflow = workflow
+            ignoreLastKeystroke = true
           }
           _ = respond(to: keyboardShortcut)
         }
       } else if context.type == .keyDown {
-        matchedWorkflow = workflow
+//        matchedWorkflow = workflow
         _ = respond(to: keyboardShortcut)
       }
 
@@ -246,7 +251,7 @@ public final class CoreController: NSObject, CoreControlling,
     }
 
     if !ignoreLastKeystroke, context.type == .keyDown {
-      commandController.previousAction = (context: context, workflow: matchedWorkflow)
+      commandController.previousAction = RecordedAction(context: context, workflow: nil)
     }
   }
 
@@ -259,7 +264,6 @@ public final class CoreController: NSObject, CoreControlling,
 
   @objc private func resetKeyboardSequence() {
     currentKeyboardSequence = []
-    currentKeyboardShortcuts = []
   }
 
   private func record(_ context: HotKeyContext) {

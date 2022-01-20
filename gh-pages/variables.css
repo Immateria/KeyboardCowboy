@@ -1,5 +1,6 @@
 :root {
   color-scheme: light dark;
+  --header-color: #CED2DD;
   --background-color: #f5f5f5;
   --primary-color: #444;
   --secondary-color: #555;
@@ -14,12 +15,13 @@
   --green-color: #78B756;
   --gray-color: #8C8C8C;
   --shadow-color: rgba(15, 15, 15, 0.3);
-  --regular-font: -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+  --regular-font: "Inter", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
   --monospace-font: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
+    --header-color: #CED2DD;
     --background-color: #111;
     --primary-color: #eee;
     --secondary-color: #888;

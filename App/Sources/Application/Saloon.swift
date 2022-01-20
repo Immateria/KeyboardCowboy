@@ -195,18 +195,20 @@ class Saloon: ViewKitStore, MenubarControllerDelegate {
   private func createKeyboardShortcutWindow() {
     let size = CGSize(width: 600, height: 200)
     let window = FloatingWindow(contentRect: .init(origin: .zero, size: size))
+    window.minSize = size
     let windowController = NSWindowController(window: window)
     var hudStack = HUDStack(hudProvider: hudFeatureController.erase())
     hudStack.window = window
     windowController.contentViewController = NSHostingController(rootView: hudStack.frame(width: size.width))
     windowController.window = window
-    window.minSize = size
 
-    coreController?.publisher.sink(receiveValue: { newValue in
+    coreController?.publisher
+      .sink(receiveValue: { newValue in
       self.hudFeatureController.state = newValue
       windowController.showWindow(nil)
     }).store(in: &subscriptions)
 
+    windowController.showWindow(nil)
     window.setFrameOrigin(.zero)
 
     self.keyboardShortcutWindowController = windowController

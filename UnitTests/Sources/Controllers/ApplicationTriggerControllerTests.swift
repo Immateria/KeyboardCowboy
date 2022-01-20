@@ -41,7 +41,7 @@ class ApplicationTriggerControllerTests: XCTestCase {
   func testApplicationTriggers() {
     let ctx = context { _ in }
 
-    ctx.controller.recieve(groups)
+    ctx.controller.receive(groups)
 
     // Verify that indexing of application triggers work correctly.
 
@@ -139,7 +139,7 @@ class ApplicationTriggerControllerTests: XCTestCase {
                             trigger: .keyboardShortcuts([]))
     let groups = [Group(name: "Group", workflows: [workflow])]
 
-    ctx.controller.recieve(groups)
+    ctx.controller.receive(groups)
 
     XCTAssertEqual(ctx.controller.openActions.count, 0)
     XCTAssertEqual(ctx.controller.closeActions.count, 0)
@@ -172,7 +172,7 @@ class ApplicationTriggerControllerTests: XCTestCase {
       groups.append(group)
     }
 
-    ctx.controller.recieve(groups)
+    ctx.controller.receive(groups)
 
     ctx.controller.process([Application.finder().bundleIdentifier])
 

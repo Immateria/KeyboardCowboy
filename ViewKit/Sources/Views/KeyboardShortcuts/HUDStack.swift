@@ -1,20 +1,18 @@
 import Cocoa
 import SwiftUI
+import ModelKit
 
 public struct HUDStack: View {
   public weak var window: NSWindow?
   @ObservedObject var hudProvider: HUDProvider
 
-  private let animation = Animation.easeOut(duration: 0.33)
   private let height: CGFloat
-  private let fontSize: CGFloat
-  private let modifierHeight: CGFloat
+  private var fontSize: CGFloat { height * 0.5 }
+  private var modifierHeight: CGFloat { height * 1.5 }
 
   public init(hudProvider: HUDProvider, height: CGFloat = 32) {
     self._hudProvider = ObservedObject(wrappedValue: hudProvider)
     self.height = height
-    self.fontSize = height * 0.5
-    self.modifierHeight = height * 1.5
   }
 
   public var body: some View {
@@ -84,8 +82,7 @@ struct HUDStack_Previews: PreviewProvider, TestPreviewProvider {
   }
 
   static var testPreview: some View {
-    HUDStack(hudProvider: HUDPreviewProvider().erase(),
-             height: 32)
+    HUDStack(hudProvider: HUDPreviewProvider().erase(), height: 32)
       .frame(width: 600)
   }
 }

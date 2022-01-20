@@ -7,15 +7,16 @@
 body > div {
   padding: 96px 0px;
   overflow: hidden;
-}
-
-div > * {
-  max-width: 800px;
   margin: 0px auto;
 }
 
-#header > * {
-  max-width: 1024px !important;
+body > div > section {
+  max-width: 1000px;
+  margin: 0px auto;
+}
+
+div > img {
+  max-width: 800px;
 }
 
 #header .quick-links {
@@ -45,18 +46,12 @@ div > * {
   border-radius: 8px;
 }
 
-#header h1 {
-  padding-top: 25px;
-  margin: 0px !important;
-}
-
-#header h1 {
+#header h1, #header h3{
+  text-align: left;
+  padding-left: 32px;
   margin: 0px;
 }
 
-#header h3 {
-  margin: 0;
-}
 
 .hstack > img.left-aligned {
   margin-right: 96px;
@@ -136,10 +131,10 @@ section.hstack > img {
 #features > section > div.hstack > div {
   flex-grow: 2;
   flex-shrink: 1;
-  max-width: 50%;
+  max-width: 45%;
   margin-top: 40px;
-  padding-left: 10px;
-  padding-right: 10px;
+  padding-left: 1%;
+  padding-right: 1%;
   border-right: 1px solid var(--background-color);
 }
 
@@ -166,18 +161,10 @@ div.illustration > div:first-child {
               0 8px 4px 0 rgba(0, 0, 0, 0.15);
 }
 
-#features > section > div.hstack > div:first-child,
-#features > section > div.hstack > div:last-child {
-  padding-left: 0px;
-}
-
-#features > section > div.hstack > div > h4 {
-  font-size: 14px;
-}
-
-#features > section > div.hstack > div > p {
-  font-size: 13px;
-}
+/*#features > section > div.hstack > div:first-child,*/
+/*#features > section > div.hstack > div:last-child {*/
+/*  padding-left: 0px;*/
+/*}*/
 
 #overview > section {
   display: flex;

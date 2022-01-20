@@ -12,6 +12,9 @@
     <meta property="og:url" content="#" />
     <meta property="og:image" content="../Screenshots/Sources/__Snapshots__/Screenshots/testAppScreenshot.macOS11-2-Dark.png" />
     <meta property="og:description" content="The missing keyboard shortcut utility" />
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+    </style>
   </head>
   <body>
     <div class="centered" id="menu">
@@ -22,25 +25,29 @@
     </div>
 
     <div id="header">
-      <section class="hstack flex-reverse">
-        <img src="../Screenshots/Sources/__Snapshots__/Screenshots/testAppScreenshot.macOS11-2-Dark.png" class="hero-image right-aligned" style="min-width: 500px"/>
-        <div style="min-width: 450px">
+      <section class="centered">
+        <div class="hstack">
           <img src="../App/Resources/Assets.xcassets/ApplicationIcon.imageset/icon_256x256.png" class="app-icon"/>
-          <h1>Keyboard Cowboy</h1>
-          <h3>
-            The missing keyboard shortcut utility
-          </h3>
-          <div class="quick-links">
-            <a href="#" class="filled">Download v1.0.0</a>
-            <a href="#" class="outlined foreground-blue">Release notes</a>
+          <div>
+            <h1>Keyboard Cowboy</h1>
+            <h3>Elevate your macOS Big Sur experience by creating workflows that are only a keystroke away.</h3>
+            <div class="quick-links">
+              <a href="#" class="filled">Download v1.0.0</a>
+              <a href="#" class="outlined foreground-blue">Release notes</a>
+            </div>
           </div>
         </div>
       </section>
+      </div>
     </div>
 
-    <div id="features" class="alternate-background">
+    
+    <div id="features">
       <section>
-        <h3 class="centered">Elevate your macOS Big Sur experience by creating workflows that are only a keystroke away.</h3>
+        <div class="centered">
+          <h2>Overview</h2>
+        </div>
+
         <div class="hstack">
           <div>
             <img src="../Screenshots/Sources/__Snapshots__/Screenshots/testAppsIconScreenshot.macOS11-3-Light.png"/>
@@ -81,7 +88,7 @@
       </section>
     </div>
 
-    <div id="groups">
+    <div id="groups" class="alternate-background">
       <section class="hstack">
         <img src="../Screenshots/Sources/__Snapshots__/Screenshots/testGroupScreenshot.macOS11-2-Light.png" class="left-aligned"/>
         <div>
@@ -102,7 +109,7 @@
       </section>
     </div>
     
-    <div id="workflows" class="alternate-background">
+    <div id="workflows">
       <section class="hstack flex-reverse">
         <img src="../Screenshots/Sources/__Snapshots__/Screenshots/testWorkflowScreenshot.macOS11-2-Dark.png" class="right-aligned"/>
         <div>
@@ -122,7 +129,7 @@
       </section>
     </div>
 
-    <div id="keyboard-shortcuts">
+    <div id="keyboard-shortcuts" class="alternate-background">
       <section class="hstack">
         <div style="min-width:350px;">
           <div class="hstack key">
@@ -166,7 +173,7 @@
       </section>
     </div>
 
-    <div id="workflows" class="alternate-background">
+    <div id="workflows">
       <section class="hstack flex-reverse">
         <img src="../Screenshots/Sources/__Snapshots__/Screenshots/testAppsIconScreenshot.macOS11-3-Light.png" class="right-aligned"/>
         <div>
@@ -183,7 +190,7 @@
       </section>
     </div>
     
-    <div id="commands">
+    <div id="commands" class="alternate-background">
       <section class="hstack">
         <div></div>
         <div>
@@ -197,6 +204,7 @@
     </div>
 
     <div id="technical">
+
       <section>
         <h2 class="foreground-red">Core Foundation</h2>
         <p>
@@ -217,7 +225,12 @@
         
         The application is written in Swift and uses the latest SwiftUI additions to render the applications user interface.
         </p>
+        
       </section>
+
+      <div>
+      <img srcset="assets/Keyboard-Dark@2x.png" id="keyboard-splash" src="assets/Keyboard-Dark.png"/>
+      </div>
     </div>
     
     <div id="pricing">

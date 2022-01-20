@@ -8,6 +8,8 @@ public struct BuiltInCommand: Identifiable, Codable, Hashable {
       return "Open Quick Run"
     case .repeatLastKeystroke:
       return "Repeat last keystroke"
+    case .recordSequence:
+      return "Record sequence"
     }
   }
   public let kind: Kind
@@ -16,6 +18,7 @@ public struct BuiltInCommand: Identifiable, Codable, Hashable {
     public var id: String { return self.rawValue }
     case quickRun
     case repeatLastKeystroke
+    case recordSequence
 
     public var displayValue: String {
       switch self {
@@ -23,6 +26,8 @@ public struct BuiltInCommand: Identifiable, Codable, Hashable {
         return "Open Quick Run dialog"
       case .repeatLastKeystroke:
         return "Repeat last keystroke"
+      case .recordSequence:
+        return "Record sequence"
       }
     }
   }
